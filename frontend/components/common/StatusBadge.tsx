@@ -1,11 +1,23 @@
 import React from "react";
 
-export const StatusBadge = () => {
+type StatusBadgeProps = {
+  decision: "PASS" | "FAIL";
+};
+
+export const StatusBadge = ({ decision }: StatusBadgeProps) => {
   return (
-    <div className="size- px-2.5 py-0.5 bg-green-100 rounded-full inline-flex justify-center items-center">
-      <div className="text-center justify-center text-green-600 text-xs font-medium font-['Inter'] leading-4">
-        ✓ PASS
-      </div>
+    <div
+      className={`px-3 py-1 rounded-full inline-flex justify-center items-center ${
+        decision === "PASS" ? "bg-green-100" : "bg-red-100"
+      }`}
+    >
+      <span
+        className={`text-xs font-bold font-sans ${
+          decision === "PASS" ? "text-green-600" : "text-red-600"
+        }`}
+      >
+        {decision === "PASS" ? "✓ PASS" : "✗ FAIL"}
+      </span>
     </div>
   );
 };

@@ -25,9 +25,9 @@ export default function RootLayout({
       lang="id"
       className={`${inter.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex">
+      <body className="min-h-screen grid grid-cols-[240px_1fr] overflow-x-hidden">
         <Sidebar />
-        <div className="flex-1 flex flex-col">
+        <div className="min-w-0 flex flex-col">
           <Topbar />
           <main className="flex-1 flex flex-col overflow-auto">{children}</main>
         </div>

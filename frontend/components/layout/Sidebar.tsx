@@ -1,11 +1,30 @@
-import React from "react";
-import Image from "next/image";
-import { LayoutDashboard, ScanLine, History, Settings, LogOut } from "lucide-react";
+"use client";
+import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  ScanLine,
+  History,
+  Settings,
+  LogOut,
+} from "lucide-react";
+import Link from "next/link";
 
 export const Sidebar = () => {
+  const pathname = usePathname();
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === href;
+    return pathname.startsWith(href);
+  };
+
+  const navItems = [
+    { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/inspection", label: "Inspection", icon: ScanLine },
+    { href: "/history", label: "Lot History", icon: History },
+    { href: "/settings", label: "Settings", icon: Settings },
+  ];
+
   return (
-    <aside className="w-60 h-screen bg-slate-900 flex flex-col shadow-lg">
-      
+    <aside className="h-screen sticky top-0 bg-slate-900 flex flex-col shadow-lg overflow-y-auto overflow-x-hidden">
       <div className="p-4 border-b border-slate-300/20 flex items-center gap-3">
         <img className="w-10 h-11" src="/logo.svg" alt="NusaQC Logo" />
         <div className="flex flex-col">
@@ -19,33 +38,17 @@ export const Sidebar = () => {
       </div>
 
       <nav className="flex flex-col gap-1 mt-4 flex-1 px-2">
-        <a href="#" className="px-3 py-3 bg-slate-800 rounded-md inline-flex items-center gap-3">
-          <LayoutDashboard className="size-4 text-sky-500" />
-          <span className="text-sky-500 text-sm font-medium font-['Inter']">
-            Dashboard
-          </span>
-        </a>
-        
-        <a href="#" className="px-3 py-3 rounded-md inline-flex items-center gap-3 hover:bg-slate-800/50 transition-colors cursor-pointer">
-          <ScanLine className="size-4 text-slate-400" />
-          <span className="text-slate-400 text-sm font-medium font-['Inter']">
-            Inspection
-          </span>
-        </a>
-
-        <a href="#" className="px-3 py-3 rounded-md inline-flex items-center gap-3 hover:bg-slate-800/50 transition-colors cursor-pointer">
-          <History className="size-4 text-slate-400" />
-          <span className="text-slate-400 text-sm font-medium font-['Inter']">
-            Lot History
-          </span>
-        </a>
-
-        <a href="#" className="px-3 py-3 rounded-md inline-flex items-center gap-3 hover:bg-slate-800/50 transition-colors cursor-pointer">
-          <Settings className="size-4 text-slate-400" />
-          <span className="text-slate-400 text-sm font-medium font-['Inter']">
-            Settings
-          </span>
-        </a>
+        {navItems.map(({href, label, icon: Icon}) => (
+          <Link key={href} href={href} className={`px-3 py-3 rounded-md inline-flex items-center gap-3 transition-colors ${isActive(href)
+            ? "bg-slate-800 border-l-sky-500"
+            : "border-l-transparent hover:bg-slate-800/50"
+          }`}>
+            <Icon className={`size-4 ${isActive(href) ? "text-sky-500" : "text-slate-400"}`}/>
+            <span className={`text-sm font-medium font-['Inter'] ${isActive(href) ? "text-sky-500" : "text-slate-400"}`}>
+              {label}
+            </span>
+          </Link>
+        ))}
       </nav>
 
       <div className="p-4 border-t border-white/10 flex justify-between items-center mt-auto">
@@ -61,7 +64,6 @@ export const Sidebar = () => {
         </div>
         <LogOut className="size-4 text-slate-400 cursor-pointer hover:text-white transition-colors" />
       </div>
-
     </aside>
   );
 };
