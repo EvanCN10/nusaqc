@@ -1,0 +1,6 @@
+.venv
+.history
+.env
+guidebook.pdf
+backend/uploads/*
+!backend/uploads/.gitkeep
