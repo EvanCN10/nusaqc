@@ -4,25 +4,23 @@ from typing import List, Literal
 DecisionType = Literal["PASS", "FAIL", "CONDITIONAL"]
 HardwareSignalType = Literal["GREEN", "YELLOW", "RED"]
 GradeType = Literal["A", "B", "C"]
-FishFamilyType = Literal["Scombridae", "Cichlidae", "Salmonidae"]
 
 DefectLabelType = Literal[
     "sisik_sisa", 
     "warna_abnormal", 
     "luka_robekan", 
-    "foreign_object", 
     "lendir_berlebih"
 ]
 
 class DefectSchema(BaseModel):
-    label: DefectLabelType
+    label: str
     bbox: List[float] = Field(..., description="[x1, y1, x2, y2] bounding box coordinates")
     confidence: float = Field(..., ge=0.0, le=1.0)
 
 class InspectionResultSchema(BaseModel):
     lot_id: str
     timestamp: str  # ISO 8601 string
-    fish_family: FishFamilyType
+    fish_family: str
     grade: GradeType
     grade_confidence: float
     defects: List[DefectSchema]

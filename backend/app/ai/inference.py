@@ -1,25 +1,29 @@
 import os
+import sys
 import cv2
 import numpy as np
 from PIL import Image
 from typing import Dict, Any, List, Optional
 import onnxruntime as ort
 
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 from app.config import settings
 from app.ai.preprocessor import ImagePreprocessor
 
-# 5 Supported Defect Labels (strictly aligned with Proposal Section 7.2 & types/index.ts)
+# 4 Supported Defect Labels (strictly aligned with Model 2 YOLOv8s Training Pipeline in models/model_2)
 ALL_DEFECT_CLASSES = {
     0: "sisik_sisa",
     1: "warna_abnormal",
     2: "luka_robekan",
-    3: "foreign_object",
-    4: "lendir_berlebih"
+    3: "lendir_berlebih"
 }
 
 FRESHNESS_CLASSES = ["A", "B", "C"]
-
-# TODO: Check if the inference engine is aligned properly with how the AI works
 
 class AIInferenceEngine:
     """
@@ -181,7 +185,7 @@ class AIInferenceEngine:
                         x2 = max(0, min(orig_shape[1], x2))
                         y2 = max(0, min(orig_shape[0], y2))
                         
-                        label = self.defect_class_map.get(cls_id, "foreign_object")
+                        label = self.defect_class_map.get(cls_id, "warna_abnormal")
                         results.append({
                             "label": label,
                             "bbox": [round(float(x1), 1), round(float(y1), 1), round(float(x2), 1), round(float(y2), 1)],
@@ -206,7 +210,7 @@ class AIInferenceEngine:
                 "classes": FRESHNESS_CLASSES
             },
             "defect_model": {
-                "name": "YOLOv8n Surface Defect Detector",
+                "name": "YOLOv8s Surface Defect Detector",
                 "version": "8.4.121",
                 "status": "Loaded (ONNX Runtime CPU)" if self.defect_session else "Simulation Mode",
                 "input_shape": [1, 3, 640, 640],

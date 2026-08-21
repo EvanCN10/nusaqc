@@ -23,7 +23,7 @@ async def run_inspection(
     db: Session = Depends(get_db)
 ):
 
-    selected_family = family or fish_family or "Scrombridae"  # Default to Scrombridae if not provided
+    selected_family = family or fish_family or "Scombridae"  # Default to Scombridae if not provided
 
     # Validate image file type
     if not image.content_type.startswith("image/"):
@@ -49,12 +49,12 @@ async def run_inspection(
     )
 
     # Return dual-compatible payload (snake_case + camelCase)
-    res_dict = result.model_dump() if hasattr(result, "modedl_dump") else result.dict()
+    res_dict = result.model_dump() if hasattr(result, "model_dump") else result.dict()
     res_dict.update({
         "lotId": result.lot_id,
-        "confidence": result.grade_confidence,
+        "confidence": round(result.grade_confidence * 100, 1) if result.grade_confidence <= 1.0 else result.grade_confidence,
         "conveyorSignal": result.hardware_signal,
-        "freshnessNote": f"Grade {result.grade} ({int(result.grade_confidence * 100)}% confidence)",
+        "freshnessNote": f"Grade {result.grade} ({int(result.grade_confidence * 100) if result.grade_confidence <= 1.0 else int(result.grade_confidence)}% confidence)",
         "processingTimeMs": result.processing_time_ms,
         "imageUrl": result.image_url,
     })

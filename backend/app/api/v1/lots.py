@@ -101,7 +101,7 @@ def get_lots(
         "total": total,
         "page": page,
         "limit": limit,
-        "toatl_pages": total_pages,
+        "total_pages": total_pages,
         "totalPages": total_pages  # For camelCase compatibility
     }
 
@@ -246,12 +246,12 @@ def get_lot_by_id(
         "id": record.id,
         "lot_id": record.lot_id,
         "lotId": record.lot_id,
-        "timestamp": record.timestamp.strftime("%Y-%m-%dT%H;%M:%SZ"),
+        "timestamp": record.timestamp.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "fish_family": record.fish_family,
         "family": record.fish_family,
         "grade": record.grade,
         "grade_confidence": record.grade_confidence,
-        "confidence": record.grade_confidence,
+        "confidence": round(record.grade_confidence * 100, 1) if record.grade_confidence <= 1.0 else record.grade_confidence,
         "defects_count": record.defects_count,
         "defectsCount": record.defects_count,
         "decision": record.decision,

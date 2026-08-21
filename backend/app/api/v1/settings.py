@@ -20,7 +20,7 @@ def get_models_status():
     ai = get_ai_engine()
     raw = ai.get_models_status()
 
-    fresh_dict = raw.get("feshness_model") or raw.get("freshnessModel") or {
+    fresh_dict = raw.get("freshness_model") or raw.get("freshnessModel") or {
         "name": "MobileNetV3-Small Freshness Classifier",
         "version": "v1.0-onnx",
         "status": "Loaded (ONNX Runtime CPU)",
@@ -28,7 +28,7 @@ def get_models_status():
     }
 
     defect_dict = raw.get("defect_model") or raw.get("defectModel") or {
-        "name": "YOLOv8n Surface Defect Detector",
+        "name": "YOLOv8s Surface Defect Detector",
         "version": "8.4.121",
         "status": "Loaded (ONNX Runtime CPU)",
         "input_shape": [1, 3, 640, 640]
