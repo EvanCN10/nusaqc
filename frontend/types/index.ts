@@ -1,5 +1,3 @@
-// types/index.ts (BELUM FIX)
-
 export type Decision = "PASS" | "FAIL" | "CONDITIONAL";
 export type HardwareSignal = "GREEN" | "YELLOW" | "RED";
 export type Grade = "A" | "B" | "C";
@@ -8,8 +6,8 @@ export type DefectLabel =
   | "sisik_sisa" 
   | "warna_abnormal" 
   | "luka_robekan" 
-  | "foreign_object" 
-  | "lendir_berlebih";
+  | "lendir_berlebih"
+  | string;
 
 export interface Defect {
   label: DefectLabel;
@@ -78,12 +76,13 @@ export interface DashboardStats {
 }
 
 export interface HardwareStatus {
-  camera: "ONLINE" | "OFFLINE" | "WARNING";
-  conveyor_relay: "ACTIVE" | "STOPPED" | "OFFLINE" | "INACTIVE";
-  conveyor?: "ACTIVE" | "STOPPED" | "OFFLINE" | "INACTIVE";
-  tower_light: "GREEN" | "YELLOW" | "RED" | "OFF";
-  towerLight?: "GREEN" | "YELLOW" | "RED" | "OFF";
-  buzzer: "ACTIVE" | "OFF";
+  camera: string;
+  conveyor_relay?: string;
+  conveyor?: string;
+  tower_light?: string;
+  towerLight?: string;
+  buzzer?: string;
   mock_mode: boolean;
+  mockMode?: boolean;
   mockModeEnabled?: boolean;
 }

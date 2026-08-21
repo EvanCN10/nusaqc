@@ -47,6 +47,8 @@ export async function fetchLots(params: {
   decision?: string;
   from?: string;
   to?: string;
+  date_from?: string;
+  date_to?: string;
   page?: number;
   limit?: number;
 }) {
@@ -55,8 +57,10 @@ export async function fetchLots(params: {
   if (params.family) query.set("family", params.family);
   if (params.grade) query.set("grade", params.grade);
   if (params.decision) query.set("decision", params.decision);
-  if (params.from) query.set("from", params.from);
-  if (params.to) query.set("to", params.to);
+  const fromVal = params.from || params.date_from;
+  const toVal = params.to || params.date_to;
+  if (fromVal) query.set("from", fromVal);
+  if (toVal) query.set("to", toVal);
   if (params.page) query.set("page", params.page.toString());
   if (params.limit) query.set("limit", params.limit.toString());
 
@@ -70,6 +74,8 @@ export async function fetchLotDetail(lotId: string): Promise<LotRecord> {
   if (!res.ok) throw new Error(`Lot record '${lotId}' not found`);
   return res.json();
 }
+
+export const fetchLotById = fetchLotDetail;
 
 export async function fetchHardwareStatus(): Promise<HardwareStatus> {
   const res = await fetch(`${API_BASE}/api/v1/hardware/status`, { cache: "no-store" });
