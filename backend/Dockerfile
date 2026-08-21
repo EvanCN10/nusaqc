@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 COPY pyproject.toml uv.lock* ./
 
 # Install Python dependencies into system Python
-RUN uv pip install --system --no-cache -r pyproject.toml
+RUN uv pip install --system --no-cache . || uv pip install --system --no-cache "fastapi[standard]>=0.115.0" "numpy>=1.26.0" "onnxruntime>=1.18.0" "opencv-python-headless>=4.9.0" "pillow>=10.0.0" "pydantic-settings>=2.0.0" "python-multipart>=0.0.9" "sqlalchemy>=2.0.0" "httpx>=0.27.0" "websockets>=12.0"
 
 # Copy backend application source code
 COPY . .
