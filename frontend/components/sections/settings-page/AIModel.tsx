@@ -1,93 +1,125 @@
 "use client";
 
-import React from "react";
-import { Brain, Check } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Brain, Check, Cpu, Sparkles, ShieldAlert } from "lucide-react";
+import { fetchModelsStatus } from "@/lib/api";
 
 type AIModelProps = {
   confidenceThreshold: number;
   onConfidenceChange: (val: number) => void;
-  activeSpecies: string[];
-  onSpeciesChange: (val: string[]) => void;
 };
 
-const SPECIES_OPTIONS = [
-  { id: "Scombridae", label: "Scombridae (Tuna/Mackerel)" },
-  { id: "Cichlidae", label: "Cichlidae (Tilapia)" },
-  { id: "Salmonidae", label: "Salmonidae (Salmon/Trout)" },
+const DEFECT_TAXONOMY = [
+  { id: "sisik_sisa", label: "0: sisik_sisa", desc: "Scale loss / Parasit Argulus, Anchor worm", color: "bg-amber-50 text-amber-800 border-amber-300" },
+  { id: "warna_abnormal", label: "1: warna_abnormal", desc: "Bacterial Red Disease (BRD), Aeromoniasis, Hemorrhage", color: "bg-red-50 text-red-800 border-red-300" },
+  { id: "luka_robekan", label: "2: luka_robekan", desc: "Skin ulcer, Fin rot, Saprolegniasis fungal wound", color: "bg-yellow-50 text-yellow-800 border-yellow-300" },
+  { id: "lendir_berlebih", label: "3: lendir_berlebih", desc: "White tail disease (WTD), excess clotted mucus", color: "bg-purple-50 text-purple-800 border-purple-300" },
 ];
 
 export const AIModel = ({
   confidenceThreshold,
   onConfidenceChange,
-  activeSpecies,
-  onSpeciesChange,
 }: AIModelProps) => {
-  const toggleSpecies = (id: string) => {
-    if (activeSpecies.includes(id)) {
-      onSpeciesChange(activeSpecies.filter((item) => item !== id));
-    } else {
-      onSpeciesChange([...activeSpecies, id]);
-    }
-  };
+  const [modelStatus, setModelStatus] = useState<any>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadStatus = async () => {
+      try {
+        const data = await fetchModelsStatus();
+        if (isMounted) setModelStatus(data);
+      } catch (err) {
+        console.warn("Failed to fetch model status:", err);
+      }
+    };
+    loadStatus();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const freshModel = modelStatus?.freshness_model || modelStatus?.freshnessModel;
+  const defectModel = modelStatus?.defect_model || modelStatus?.defectModel;
 
   return (
-    <div className="w-full p-6 bg-white rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-slate-300/50 flex flex-col gap-6">
+    <div className="w-full p-6 bg-white rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-slate-300 flex flex-col gap-6">
       {/* Section Header */}
-      <div className="w-full pb-4 border-b border-slate-300/30 flex items-center gap-2">
-        <Brain className="size-5 text-sky-700" />
-        <h2 className="text-xl font-semibold font-sans text-zinc-900">
-          AI Model Configuration
-        </h2>
+      <div className="w-full pb-3 border-b border-slate-200 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <Brain className="size-5 text-sky-700" />
+          <h2 className="text-lg font-bold font-sans text-zinc-900">
+            Dual AI Model Inference Architecture
+          </h2>
+        </div>
+        <span className="text-xs font-mono font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-full border border-sky-200">
+          ONNX Runtime (CPU)
+        </span>
       </div>
 
       {/* Model Status Cards Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Card 1: Freshness Classifier */}
-        <div className="p-4 bg-gray-100 rounded-lg border-l-4 border-r border-t border-b border-sky-500 flex flex-col gap-2">
+        <div className="p-4 bg-slate-50 rounded-lg border-l-4 border-emerald-500 border-t border-r border-b border-slate-200 flex flex-col gap-2">
           <div className="flex justify-between items-start">
-            <span className="text-sm font-bold font-sans text-zinc-900">
-              Freshness Classifier
-            </span>
-            {/* TODO: Dynamically display model loaded status from GET /api/v1/models/status */}
-            <div className="px-2 py-0.5 bg-green-100 rounded-sm outline outline-1 outline-green-200 flex items-center gap-1">
-              <div className="size-2 bg-green-800 rounded-full" />
-              <span className="text-xs font-semibold font-sans tracking-wide text-green-800">
-                Loaded
+            <div>
+              <span className="text-sm font-bold font-sans text-zinc-900 block">
+                Model 1 — Freshness Classifier
+              </span>
+              <span className="text-xs text-gray-500 font-sans">
+                Standar Organoleptik SNI 2729:2013 (Grade A, B, C)
+              </span>
+            </div>
+            <div className="px-2 py-0.5 bg-emerald-100 rounded-sm border border-emerald-300 flex items-center gap-1">
+              <div className="size-1.5 bg-emerald-600 rounded-full" />
+              <span className="text-[11px] font-bold font-sans text-emerald-800">
+                {freshModel?.status || "Loaded (CPU)"}
               </span>
             </div>
           </div>
-          <span className="text-sm font-medium font-mono text-gray-700">
-            MobileNetV3-Small ONNX v1.2.0
-          </span>
+          <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-xs font-mono text-gray-600">
+            <span>MobileNetV3-Small (Float32)</span>
+            <span className="font-bold text-zinc-800">Input: [1, 3, 224, 224]</span>
+          </div>
         </div>
 
         {/* Card 2: Defect Detector */}
-        <div className="p-4 bg-gray-100 rounded-lg border-l-4 border-r border-t border-b border-sky-500 flex flex-col gap-2">
+        <div className="p-4 bg-slate-50 rounded-lg border-l-4 border-rose-500 border-t border-r border-b border-slate-200 flex flex-col gap-2">
           <div className="flex justify-between items-start">
-            <span className="text-sm font-bold font-sans text-zinc-900">
-              Defect Detector
-            </span>
-            <div className="px-2 py-0.5 bg-green-100 rounded-sm outline outline-1 outline-green-200 flex items-center gap-1">
-              <div className="size-2 bg-green-800 rounded-full" />
-              <span className="text-xs font-semibold font-sans tracking-wide text-green-800">
-                Loaded
+            <div>
+              <span className="text-sm font-bold font-sans text-zinc-900 block">
+                Model 2 — Surface Defect Detector
+              </span>
+              <span className="text-xs text-gray-500 font-sans">
+                YOLOv8s Real-Time Object Detection (4 Classes)
+              </span>
+            </div>
+            <div className="px-2 py-0.5 bg-emerald-100 rounded-sm border border-emerald-300 flex items-center gap-1">
+              <div className="size-1.5 bg-emerald-600 rounded-full" />
+              <span className="text-[11px] font-bold font-sans text-emerald-800">
+                {defectModel?.status || "Loaded (CPU)"}
               </span>
             </div>
           </div>
-          <span className="text-sm font-medium font-mono text-gray-700">
-            YOLOv8n ONNX v1.1.0
-          </span>
+          <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-xs font-mono text-gray-600">
+            <span>YOLOv8s ONNX (640x640)</span>
+            <span className="font-bold text-zinc-800">Input: [1, 3, 640, 640]</span>
+          </div>
         </div>
       </div>
 
-      {/* Confidence Threshold (FAIL) */}
-      <div className="pt-4 flex flex-col gap-3">
+      {/* Confidence Threshold Slider */}
+      <div className="pt-2 flex flex-col gap-3">
         <div className="flex justify-between items-center">
-          <span className="text-sm font-bold font-sans text-zinc-900">
-            Confidence Threshold (FAIL)
-          </span>
-          <div className="px-2 py-0.5 bg-rose-200/30 rounded-sm">
-            <span className="text-sm font-bold font-mono text-red-700">
+          <div>
+            <span className="text-sm font-bold font-sans text-zinc-900 block">
+              Confidence Decision Threshold
+            </span>
+            <span className="text-xs text-gray-500 font-sans">
+              Ambang batas keyakinan model sebelum sistem memicu aktuator reject/conditional.
+            </span>
+          </div>
+          <div className="px-2.5 py-1 bg-rose-50 border border-rose-200 rounded-sm">
+            <span className="text-sm font-bold font-mono text-rose-700">
               {confidenceThreshold}%
             </span>
           </div>
@@ -97,56 +129,43 @@ export const AIModel = ({
         <div className="relative w-full flex items-center">
           <input
             type="range"
-            min="0"
-            max="100"
+            min="50"
+            max="95"
             value={confidenceThreshold}
             onChange={(e) => onConfidenceChange(Number(e.target.value))}
-            className="w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-red-700"
+            className="w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-sky-700"
           />
         </div>
 
-        <div className="flex justify-between items-center text-xs font-mono text-gray-700">
-          <span>More strict (Higher False Positives)</span>
-          <span>More lenient (Higher False Negatives)</span>
+        <div className="flex justify-between items-center text-[11px] font-mono text-gray-500">
+          <span>50% (Toleran / Deteksi Sensitif)</span>
+          <span>95% (Ketat / High Precision)</span>
         </div>
       </div>
 
-      {/* Target Species Filter (Active Models) */}
-      <div className="pt-4 border-t border-slate-300/30 flex flex-col gap-3">
-        <span className="text-sm font-bold font-sans text-zinc-900">
-          Target Species Filter (Active Models)
-        </span>
+      {/* Active Defect Taxonomy (4 Classes) */}
+      <div className="pt-4 border-t border-slate-200 flex flex-col gap-3">
+        <div>
+          <span className="text-sm font-bold font-sans text-zinc-900 block">
+            Taksonomi 4 Kelas Defek Permukaan (YOLOv8s)
+          </span>
+          <span className="text-xs text-gray-500 font-sans">
+            Seluruh kelas telah diselaraskan dengan dataset hasil training di models/model_2.
+          </span>
+        </div>
 
-        <div className="flex flex-wrap gap-4">
-          {SPECIES_OPTIONS.map((opt) => {
-            const isActive = activeSpecies.includes(opt.id);
-            return (
-              <button
-                type="button"
-                key={opt.id}
-                onClick={() => toggleSpecies(opt.id)}
-                className={`pl-2.5 pr-3 py-2 rounded-md shadow-sm outline outline-1 outline-offset-[-1px] flex items-center gap-2 cursor-pointer transition-all ${
-                  isActive
-                    ? "bg-white outline-sky-500 text-zinc-900"
-                    : "bg-gray-100 opacity-70 outline-slate-300/50 text-gray-700"
-                }`}
-              >
-                <div
-                  className={`size-4 rounded-sm flex items-center justify-center transition-colors ${
-                    isActive ? "bg-sky-500" : "bg-white border border-slate-300"
-                  }`}
-                >
-                  {isActive && <Check className="size-3 text-white stroke-[3]" />}
-                </div>
-                <span className="text-base font-normal font-sans">
-                  {opt.label}
-                </span>
-              </button>
-            );
-          })}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {DEFECT_TAXONOMY.map((item) => (
+            <div
+              key={item.id}
+              className={`p-3 rounded-md border ${item.color} flex flex-col gap-1`}
+            >
+              <span className="text-xs font-bold font-mono">{item.label}</span>
+              <span className="text-[11px] font-sans opacity-90">{item.desc}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 };
-

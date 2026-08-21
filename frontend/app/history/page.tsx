@@ -6,7 +6,6 @@ import { TableSection } from "@/components/sections/lot-history-page/TableSectio
 
 export default function HistoryPage() {
   const [search, setSearch] = useState("");
-  const [fishFamily, setFishFamily] = useState("all");
   const [grade, setGrade] = useState("all");
   const [decision, setDecision] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
@@ -14,7 +13,6 @@ export default function HistoryPage() {
 
   const handleClearFilters = () => {
     setSearch("");
-    setFishFamily("all");
     setGrade("all");
     setDecision("all");
     setDateFrom("");
@@ -22,12 +20,10 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
       <SearchHistory
         search={search}
         onSearchChange={setSearch}
-        fishFamily={fishFamily}
-        onFishFamilyChange={setFishFamily}
         grade={grade}
         onGradeChange={setGrade}
         decision={decision}
@@ -40,7 +36,6 @@ export default function HistoryPage() {
       />
       <TableSection
         search={search}
-        fishFamily={fishFamily}
         grade={grade}
         decision={decision}
         dateFrom={dateFrom}
@@ -48,4 +43,4 @@ export default function HistoryPage() {
       />
     </div>
   );
-}
+}

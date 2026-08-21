@@ -1,34 +1,25 @@
 "use client";
 
 import React from "react";
-import { Search, ChevronDown, Download } from "lucide-react";
-
-const FISH_FAMILIES = [
-  { value: "all", label: "All Fish Families" },
-  { value: "Scombridae", label: "Scombridae" },
-  { value: "Cichlidae", label: "Cichlidae" },
-  { value: "Salmonidae", label: "Salmonidae" },
-  // TODO: Replace options dynamically from GET /api/v1/fish-families
-];
+import { Search, ChevronDown, Download, RotateCcw } from "lucide-react";
 
 const GRADES = [
-  { value: "all", label: "All Grades" },
-  { value: "A", label: "Grade A" },
-  { value: "B", label: "Grade B" },
-  { value: "C", label: "Grade C" },
+  { value: "all", label: "Semua Grade Mutu" },
+  { value: "A", label: "Grade A (Prima / Ekspor)" },
+  { value: "B", label: "Grade B (Segar / Domestik)" },
+  { value: "C", label: "Grade C (Reject / Busuk)" },
 ];
 
 const DECISIONS = [
-  { value: "all", label: "All Decisions" },
-  { value: "PASS", label: "PASS" },
-  { value: "FAIL", label: "FAIL" },
+  { value: "all", label: "Semua Keputusan" },
+  { value: "PASS", label: "PASS (Lolos Mutu)" },
+  { value: "CONDITIONAL", label: "CONDITIONAL (Verifikasi)" },
+  { value: "FAIL", label: "FAIL (Reject)" },
 ];
 
 type SearchHistoryProps = {
   search: string;
   onSearchChange: (val: string) => void;
-  fishFamily: string;
-  onFishFamilyChange: (val: string) => void;
   grade: string;
   onGradeChange: (val: string) => void;
   decision: string;
@@ -43,8 +34,6 @@ type SearchHistoryProps = {
 export const SearchHistory = ({
   search,
   onSearchChange,
-  fishFamily,
-  onFishFamilyChange,
   grade,
   onGradeChange,
   decision,
@@ -55,56 +44,45 @@ export const SearchHistory = ({
   onDateToChange,
   onClearFilters,
 }: SearchHistoryProps) => {
+  const handleExportCsv = () => {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+    window.open(`${baseUrl}/lots/export?format=csv`, "_blank");
+  };
+
   return (
     <div className="w-full flex flex-col gap-4">
       {/* Page Title & Subtitle */}
       <div className="w-full flex flex-col">
-        <h1 className="text-2xl font-bold font-sans text-zinc-900">
-          Inspection History
+        <h1 className="text-2xl font-black font-sans text-zinc-900 tracking-tight">
+          Inspection History & Quality Audit Logs
         </h1>
-        <p className="text-sm font-sans text-gray-500">
-          All inspection records from this session
+        <p className="text-xs font-sans text-gray-500 mt-0.5">
+          Seluruh rekaman log hasil inferensi AI, skor mutu organoleptik SNI 2729:2013, dan lokalisasi defek.
         </p>
       </div>
 
       {/* Search & Filter Card */}
-      <div className="w-full bg-white rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-slate-300 p-6 flex flex-col gap-4">
+      <div className="w-full bg-white rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-slate-300 p-5 flex flex-col gap-4">
         {/* Row 1: Search Input & Dropdowns */}
-        <div className="flex items-center gap-3 w-full">
+        <div className="flex flex-wrap items-center gap-3 w-full">
           {/* Search Input */}
-          <div className="relative w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500 pointer-events-none" />
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search by Lot ID..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 text-sm font-sans text-zinc-900 placeholder:text-gray-500 focus:outline-sky-500"
+              placeholder="Cari berdasarkan Lot ID (e.g. LOT-2026)..."
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 text-sm font-sans text-zinc-900 placeholder:text-gray-400 focus:outline-sky-500"
             />
           </div>
 
-          {/* Fish Family Filter */}
-          <div className="relative">
-            <select
-              value={fishFamily}
-              onChange={(e) => onFishFamilyChange(e.target.value)}
-              className="px-3 py-2.5 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 appearance-none pr-9 text-sm font-sans text-zinc-900 cursor-pointer focus:outline-sky-500"
-            >
-              {FISH_FAMILIES.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-4 text-gray-500 pointer-events-none" />
-          </div>
-
           {/* Grade Filter */}
-          <div className="relative">
+          <div className="relative min-w-[180px]">
             <select
               value={grade}
               onChange={(e) => onGradeChange(e.target.value)}
-              className="px-3 py-2.5 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 appearance-none pr-9 text-sm font-sans text-zinc-900 cursor-pointer focus:outline-sky-500"
+              className="w-full px-3 py-2 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 appearance-none pr-9 text-sm font-sans text-zinc-900 cursor-pointer focus:outline-sky-500"
             >
               {GRADES.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -112,15 +90,15 @@ export const SearchHistory = ({
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-4 text-gray-500 pointer-events-none" />
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none" />
           </div>
 
           {/* Decision Filter */}
-          <div className="relative">
+          <div className="relative min-w-[180px]">
             <select
               value={decision}
               onChange={(e) => onDecisionChange(e.target.value)}
-              className="px-3 py-2.5 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 appearance-none pr-9 text-sm font-sans text-zinc-900 cursor-pointer focus:outline-sky-500"
+              className="w-full px-3 py-2 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 appearance-none pr-9 text-sm font-sans text-zinc-900 cursor-pointer focus:outline-sky-500"
             >
               {DECISIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -128,48 +106,48 @@ export const SearchHistory = ({
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-4 text-gray-500 pointer-events-none" />
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none" />
           </div>
         </div>
 
         {/* Row 2: Date Range & Actions */}
-        <div className="flex items-center gap-3 w-full">
+        <div className="flex flex-wrap items-center justify-between gap-3 w-full pt-1 border-t border-slate-100">
           {/* Date Range Picker */}
-          <div className="flex items-center gap-2 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 px-3 py-1.5 text-sm font-sans">
-            <span className="text-gray-700">From:</span>
+          <div className="flex items-center gap-2 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 px-3 py-1.5 text-xs font-sans">
+            <span className="text-gray-600 font-medium">Dari:</span>
             <input
               type="date"
               value={dateFrom}
               onChange={(e) => onDateFromChange(e.target.value)}
-              className="bg-transparent border-none text-sm font-mono text-zinc-900 focus:outline-none cursor-pointer"
+              className="bg-transparent border-none text-xs font-mono text-zinc-900 focus:outline-none cursor-pointer"
             />
-            <span className="text-gray-700 ml-2">To:</span>
+            <span className="text-gray-600 font-medium ml-2">Sampai:</span>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => onDateToChange(e.target.value)}
-              className="bg-transparent border-none text-sm font-mono text-zinc-900 focus:outline-none cursor-pointer"
+              className="bg-transparent border-none text-xs font-mono text-zinc-900 focus:outline-none cursor-pointer"
             />
           </div>
 
           {/* Right Action Buttons */}
-          <div className="ml-auto flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={onClearFilters}
-              className="text-sm font-medium font-sans text-sky-700 hover:underline cursor-pointer"
+              className="text-xs font-semibold font-sans text-sky-700 hover:text-sky-900 transition-colors flex items-center gap-1 cursor-pointer"
             >
-              Clear Filters
+              <RotateCcw className="size-3" />
+              <span>Reset Filter</span>
             </button>
 
             <button
-              onClick={() => {
-                // TODO: Implement CSV export call to GET /api/v1/lots/export?format=csv
-                console.log("Export CSV clicked");
-              }}
-              className="flex items-center gap-2 px-4 py-2 outline outline-1 outline-sky-700 rounded-sm text-sky-700 text-sm font-medium font-sans hover:bg-sky-50 transition-colors cursor-pointer"
+              type="button"
+              onClick={handleExportCsv}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-50 outline outline-1 outline-sky-700 rounded-sm text-sky-700 text-xs font-bold font-sans hover:bg-sky-100 transition-colors cursor-pointer shadow-xs"
             >
-              <Download className="size-4 text-sky-700" />
-              <span>Export CSV</span>
+              <Download className="size-3.5 text-sky-700" />
+              <span>Ekspor CSV</span>
             </button>
           </div>
         </div>
@@ -177,4 +155,3 @@ export const SearchHistory = ({
     </div>
   );
 };
-

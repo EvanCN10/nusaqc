@@ -1,143 +1,270 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { LotRecord, MOCK_LOTS } from "@/lib/mockData";
+import { ChevronLeft, ChevronRight, Loader2, Inbox, Eye, Clock } from "lucide-react";
+import { GradeBadge } from "@/components/common/GradeBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { fetchLots } from "@/lib/api";
+import { LotRecord } from "@/types";
 
-const GRADE_CONFIG: Record<LotRecord["grade"], { bg: string; text: string }> = {
-  A: { bg: "bg-green-100", text: "text-green-600" },
-  B: { bg: "bg-amber-100", text: "text-amber-600" },
-  C: { bg: "bg-red-100",   text: "text-red-600"   },
-};
-
-const DECISION_CONFIG: Record<LotRecord["decision"], { bg: string; text: string; label: string }> = {
-  PASS: { bg: "bg-green-100", text: "text-green-600", label: "✓ PASS" },
-  FAIL: { bg: "bg-red-100",   text: "text-red-600",   label: "✗ FAIL" },
-};
-
-// TODO: These props will be passed from history/page.tsx after SearchHistory state is lifted up to parent
 type TableSectionProps = {
   search?: string;
-  fishFamily?: string;
   grade?: string;
   decision?: string;
   dateFrom?: string;
   dateTo?: string;
 };
 
+function formatFullTimestamp(ts?: string): string {
+  if (!ts) return "-";
+  try {
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return ts;
+    return d.toLocaleString("id-ID", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  } catch {
+    return ts;
+  }
+}
+
 export const TableSection = ({
   search = "",
-  fishFamily = "all",
   grade = "all",
   decision = "all",
   dateFrom = "",
   dateTo = "",
 }: TableSectionProps) => {
-  // TODO: Replace this client-side filter with API query params once backend is ready
-  // e.g. GET /api/v1/lots?search={search}&family={fishFamily}&grade={grade}&decision={decision}&from={dateFrom}&to={dateTo}
-  const filteredLots = useMemo(() => {
-    return MOCK_LOTS.filter((lot) => {
-      if (search && !lot.lotId.toLowerCase().includes(search.toLowerCase())) return false;
-      if (fishFamily !== "all" && lot.fishFamily !== fishFamily) return false;
-      if (grade !== "all" && lot.grade !== grade) return false;
-      if (decision !== "all" && lot.decision !== decision) return false;
-      // TODO: Date range filter — requires lot.timestamp to include full date (ISO 8601), not just time string
-      return true;
-    });
-  }, [search, fishFamily, grade, decision, dateFrom, dateTo]);
+  const [lots, setLots] = useState<LotRecord[]>([]);
+  const [total, setTotal] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [limit] = useState<number>(10);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const total = MOCK_LOTS.length; // TODO: Use total count from API response pagination metadata
-  const passCount = filteredLots.filter((l) => l.decision === "PASS").length;
-  const failCount = filteredLots.filter((l) => l.decision === "FAIL").length;
-  const avgConfidence =
-    filteredLots.length > 0
-      ? (filteredLots.reduce((sum, l) => sum + l.confidence, 0) / filteredLots.length).toFixed(1)
-      : "0.0";
-  const passPercent = filteredLots.length > 0 ? Math.round((passCount / filteredLots.length) * 100) : 0;
-  const failPercent = filteredLots.length > 0 ? Math.round((failCount / filteredLots.length) * 100) : 0;
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetchLots({
+        page,
+        limit,
+        search: search || undefined,
+        grade: grade !== "all" ? grade : undefined,
+        decision: decision !== "all" ? decision : undefined,
+        date_from: dateFrom || undefined,
+        date_to: dateTo || undefined,
+      });
+
+      setLots(res.items || []);
+      setTotal(res.total || 0);
+      setTotalPages(res.total_pages || res.totalPages || 1);
+    } catch (err) {
+      console.warn("Failed to fetch lot records:", err);
+      setLots([]);
+      setTotal(0);
+      setTotalPages(1);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, limit, search, grade, decision, dateFrom, dateTo]);
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, grade, decision, dateFrom, dateTo]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const passCount = lots.filter((l) => (l.decision || "").toUpperCase() === "PASS").length;
+  const failCount = lots.filter((l) => (l.decision || "").toUpperCase() === "FAIL").length;
 
   return (
     <div className="w-full flex flex-col gap-4">
-      {/* Stats Bar */}
-      <div className="pb-2 border-b border-slate-300">
-        <p className="text-sm font-sans text-gray-700">
-          Showing {filteredLots.length} of {total} records | Pass: {passCount} ({passPercent}%) | Fail: {failCount} ({failPercent}%) | Avg Confidence: {avgConfidence}%
-        </p>
+      {/* Stats Summary Bar */}
+      <div className="flex items-center justify-between pb-2 border-b border-slate-200 text-xs font-sans text-gray-600">
+        <div>
+          <span>Menampilkan </span>
+          <span className="font-bold text-zinc-900">{lots.length}</span>
+          <span> dari </span>
+          <span className="font-bold text-zinc-900">{total}</span>
+          <span> rekaman log inspeksi</span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-sm border border-emerald-200 font-medium">
+            Lolos: {passCount}
+          </span>
+          <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-sm border border-rose-200 font-medium">
+            Reject: {failCount}
+          </span>
+        </div>
       </div>
 
       {/* Table Card */}
       <div className="w-full bg-white rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-slate-300 overflow-hidden">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-gray-100 border-b border-slate-300">
-              <th className="w-52 px-4 py-3 text-left text-xs font-medium font-sans text-gray-700">Lot ID</th>
-              <th className="w-28 px-4 py-3 text-left text-xs font-medium font-sans text-gray-700">Timestamp</th>
-              <th className="w-32 px-4 py-3 text-left text-xs font-medium font-sans text-gray-700">Fish Family</th>
-              <th className="w-20 px-4 py-3 text-left text-xs font-medium font-sans text-gray-700">Grade</th>
-              <th className="w-32 px-4 py-3 text-left text-xs font-medium font-sans text-gray-700">Defects Found</th>
-              <th className="w-28 px-4 py-3 text-left text-xs font-medium font-sans text-gray-700">Decision</th>
-              <th className="w-28 px-4 py-3 text-left text-xs font-medium font-sans text-gray-700">Confidence</th>
-              <th className="w-24 px-4 py-3 text-right text-xs font-medium font-sans text-gray-700">Actions</th>
+            <tr className="bg-slate-50 border-b border-slate-200">
+              <th className="w-52 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
+                Lot ID
+              </th>
+              <th className="w-44 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
+                Timestamp
+              </th>
+              <th className="w-24 px-4 py-3 text-center text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
+                Grade (SNI)
+              </th>
+              <th className="w-36 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
+                Defek Terdeteksi
+              </th>
+              <th className="w-32 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
+                Keputusan
+              </th>
+              <th className="w-28 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
+                Confidence
+              </th>
+              <th className="w-24 px-4 py-3 text-right text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
+                Aksi
+              </th>
             </tr>
           </thead>
 
           <tbody>
-            {filteredLots.map((lot, index) => {
-              const gradeStyle = GRADE_CONFIG[lot.grade];
-              const decStyle = DECISION_CONFIG[lot.decision];
-              return (
-                <tr
-                  key={lot.lotId}
-                  className={`${index !== 0 ? "border-t border-slate-300" : ""} hover:bg-slate-50 transition-colors`}
-                >
-                  <td className="w-52 px-4 py-4">
-                    <span className="text-sm font-medium font-mono text-sky-500">{lot.lotId}</span>
-                  </td>
-                  <td className="w-28 px-4 py-4">
-                    <span className="text-sm font-medium font-mono text-gray-700">{lot.timestamp}</span>
-                  </td>
-                  <td className="w-32 px-4 py-4">
-                    <span className="text-sm font-normal font-sans text-zinc-900">{lot.fishFamily}</span>
-                  </td>
-                  <td className="w-20 px-4 py-3.5">
-                    <div className={`w-6 py-1 ${gradeStyle.bg} rounded-full inline-flex justify-center items-center`}>
-                      <span className={`text-xs font-bold font-sans ${gradeStyle.text}`}>{lot.grade}</span>
-                    </div>
-                  </td>
-                  <td className="w-32 px-4 py-4">
-                    <span className="text-sm font-normal font-sans text-gray-700">
-                      {lot.defectsCount} {lot.defectsCount === 1 ? "defect" : "defects"}
-                    </span>
-                  </td>
-                  <td className="w-28 px-4 py-4">
-                    <div className={`px-2.5 py-0.5 ${decStyle.bg} rounded-full inline-flex justify-center items-center`}>
-                      <span className={`text-xs font-medium font-sans ${decStyle.text}`}>{decStyle.label}</span>
-                    </div>
-                  </td>
-                  <td className="w-28 px-4 py-4">
-                    <span className="text-sm font-medium font-mono text-sky-500">{lot.confidence}%</span>
-                  </td>
-                  <td className="w-24 px-4 py-3 text-right">
-                    <Link
-                      href={`/history/${lot.lotId}`}
-                      className="inline-block px-3 py-1 rounded-sm outline outline-1 outline-slate-300 text-xs font-normal font-sans text-zinc-900 hover:bg-slate-100 transition-colors cursor-pointer"
-                    >
-                      View
-                    </Link>
-                  </td>
-                </tr>
-              );
-            })}
-
-            {filteredLots.length === 0 && (
+            {isLoading ? (
               <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-sm font-sans text-gray-500">
-                  No records found matching your filters.
+                <td colSpan={7} className="px-4 py-16 text-center text-gray-500">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Loader2 className="size-7 animate-spin text-sky-600" />
+                    <span className="text-xs font-medium font-sans">Memuat data log inspeksi...</span>
+                  </div>
                 </td>
               </tr>
+            ) : lots.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-16 text-center text-gray-500">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Inbox className="size-8 text-slate-300" />
+                    <span className="text-sm font-semibold font-sans text-zinc-700">
+                      Tidak ada catatan yang sesuai dengan filter.
+                    </span>
+                    <span className="text-xs font-sans text-gray-400">
+                      Coba reset kata kunci pencarian atau tanggal inspeksi.
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              lots.map((lot, index) => {
+                const rowLotId = lot.lotId || lot.lot_id || `LOT-${lot.id}`;
+                const rowGrade = lot.grade || "A";
+                const rowDecision = lot.decision || "PASS";
+                const rowDefects = lot.defectsCount ?? lot.defects_count ?? (lot.defects ? lot.defects.length : 0);
+                const rowConf = Math.round(
+                  lot.confidence !== undefined
+                    ? lot.confidence > 1.0 ? lot.confidence : lot.confidence * 100
+                    : (lot.grade_confidence ? lot.grade_confidence * 100 : 90)
+                );
+
+                return (
+                  <tr
+                    key={rowLotId}
+                    className={`${index !== 0 ? "border-t border-slate-100" : ""} hover:bg-slate-50 transition-colors`}
+                  >
+                    {/* Lot ID */}
+                    <td className="px-4 py-3.5 w-52">
+                      <Link
+                        href={`/history/${rowLotId}`}
+                        className="text-xs font-bold font-mono text-sky-600 hover:text-sky-800 hover:underline"
+                      >
+                        {rowLotId}
+                      </Link>
+                    </td>
+
+                    {/* Timestamp */}
+                    <td className="px-4 py-3.5 w-44 text-xs font-mono text-gray-600">
+                      {formatFullTimestamp(lot.timestamp)}
+                    </td>
+
+                    {/* Grade Badge */}
+                    <td className="px-4 py-3.5 w-24 text-center">
+                      <GradeBadge grade={rowGrade} />
+                    </td>
+
+                    {/* Defects Count */}
+                    <td className="px-4 py-3.5 w-36">
+                      <span
+                        className={`text-xs font-mono px-2 py-0.5 rounded-sm font-semibold border ${
+                          rowDefects > 0
+                            ? "bg-rose-50 text-rose-700 border-rose-200"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        }`}
+                      >
+                        {rowDefects} {rowDefects === 1 ? "defek" : "defek"}
+                      </span>
+                    </td>
+
+                    {/* Decision */}
+                    <td className="px-4 py-3.5 w-32">
+                      <StatusBadge decision={rowDecision} />
+                    </td>
+
+                    {/* Confidence */}
+                    <td className="px-4 py-3.5 w-28 text-xs font-bold font-mono text-zinc-900">
+                      {rowConf}%
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-4 py-3.5 w-24 text-right">
+                      <Link
+                        href={`/history/${rowLotId}`}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm bg-slate-50 outline outline-1 outline-slate-300 text-xs font-semibold font-sans text-zinc-900 hover:bg-sky-50 hover:outline-sky-500 hover:text-sky-700 transition-colors cursor-pointer"
+                      >
+                        <Eye className="size-3" />
+                        <span>Detail</span>
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
+
+        {/* Pagination Footer */}
+        <div className="px-4 py-3 bg-slate-50/80 border-t border-slate-200 flex items-center justify-between">
+          <span className="text-xs font-sans text-gray-500">
+            Halaman <span className="font-bold text-zinc-900">{page}</span> dari{" "}
+            <span className="font-bold text-zinc-900">{Math.max(1, totalPages)}</span>
+          </span>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1 || isLoading}
+              className="p-1.5 rounded-sm border border-slate-300 bg-white text-gray-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+            >
+              <ChevronLeft className="size-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages || isLoading}
+              className="p-1.5 rounded-sm border border-slate-300 bg-white text-gray-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+            >
+              <ChevronRight className="size-4" />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
