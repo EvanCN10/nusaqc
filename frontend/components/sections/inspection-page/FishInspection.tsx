@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Camera, Plus } from "lucide-react";
+import { Camera, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { runInspection } from "@/lib/api";
+import { InspectionResult } from "@/types";
 
 const FISH_FAMILIES = [
   "Scombridae",
@@ -10,6 +12,10 @@ const FISH_FAMILIES = [
   "Salmonidae",
   // TODO: Replace with dynamic options from GET /api/v1/fish-families
 ];
+
+interface FishInspectionProps {
+  onInspectionComplete?: (result: InspectionResult) => void;
+}
 
 export const FishInspection = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);

@@ -4,46 +4,86 @@ export type Decision = "PASS" | "FAIL" | "CONDITIONAL";
 export type HardwareSignal = "GREEN" | "YELLOW" | "RED";
 export type Grade = "A" | "B" | "C";
 
-export type Defect = {
-  label: "sisik_sisa" | "warna_abnormal" | "luka_robekan" | "foreign_object" | "lendir_berlebih";
-  bbox: [number, number, number, number]; // [x1, y1, x2, y2]
-  confidence: number;
-};
+export type DefectLabel = 
+  | "sisik_sisa" 
+  | "warna_abnormal" 
+  | "luka_robekan" 
+  | "foreign_object" 
+  | "lendir_berlebih";
 
-export type InspectionResult = {
-  lot_id: string;
-  timestamp: string; // ISO 8601
-  fish_family: "Scombridae" | "Cichlidae" | "Salmonidae";
+export interface Defect {
+  label: DefectLabel;
+  bbox: [number, number, number, number]; // [x1, y1, x2, y2] in original image space
+  confidence: number;
+}
+
+export interface InspectionResult {
+  lotId: string;
+  lot_id?: string;
+  timestamp: string;
+  family: string;
+  fish_family?: string;
   grade: Grade;
-  grade_confidence: number;
+  confidence: number;
+  grade_confidence?: number;
   defects: Defect[];
   decision: Decision;
-  hardware_signal: HardwareSignal;
-  processing_time_ms: number;
-};
+  conveyorSignal: HardwareSignal;
+  hardware_signal?: HardwareSignal;
+  processingTimeMs: number;
+  processing_time_ms?: number;
+  imageUrl?: string;
+  image_url?: string;
+  freshnessNote?: string;
+}
 
-export type LotSummary = {
-  lot_id: string;
-  fish_family: string;
-  grade: Grade;
-  decision: Decision;
-  confidence: number;
+export interface LotRecord {
+  id: number;
+  lotId: string;
+  lot_id?: string;
   timestamp: string;
-};
+  family: string;
+  fish_family?: string;
+  grade: Grade;
+  confidence: number;
+  grade_confidence?: number;
+  defectsCount: number;
+  defects_count?: number;
+  decision: Decision;
+  conveyorSignal: HardwareSignal;
+  hardware_signal?: HardwareSignal;
+  imageUrl?: string;
+  image_path?: string;
+  processing_time_ms?: number;
+  processingTimeMs?: number;
+  defects?: Defect[];
+}
 
-export type DashboardStats = {
+export interface DashboardStats {
   total_inspected_today: number;
+  totalInspectedToday?: number;
   current_lot_id: string;
+  currentLotId?: string;
   pass_rate: number;
+  passRate?: number;
   pass_rate_delta: number;
+  passRateDelta?: number;
   fail_rate: number;
+  failRate?: number;
   fail_rate_delta: number;
-  avg_confidence_score: number;
-};
+  failRateDelta?: number;
+  avg_confidence: number;
+  avg_confidence_score?: number;
+  avgConfidence?: number;
+}
 
-export type HardwareStatus = {
-  camera: "ONLINE" | "OFFLINE";
-  conveyor_relay: "ACTIVE" | "INACTIVE";
-  tower_light: "GREEN" | "YELLOW" | "RED";
-  mock_mode_enabled: boolean;
-};
+export interface HardwareStatus {
+  camera: "ONLINE" | "OFFLINE" | "WARNING";
+  conveyor_relay: "ACTIVE" | "STOPPED" | "OFFLINE" | "INACTIVE";
+  conveyor?: "ACTIVE" | "STOPPED" | "OFFLINE" | "INACTIVE";
+  tower_light: "GREEN" | "YELLOW" | "RED" | "OFF";
+  towerLight?: "GREEN" | "YELLOW" | "RED" | "OFF";
+  buzzer: "ACTIVE" | "OFF";
+  mock_mode: boolean;
+  mockModeEnabled?: boolean;
+}
