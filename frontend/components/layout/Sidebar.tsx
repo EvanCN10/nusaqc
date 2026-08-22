@@ -28,14 +28,14 @@ export const Sidebar = () => {
   ];
 
   return (
-    <aside className="h-screen sticky top-0 bg-slate-900 flex flex-col shadow-lg overflow-y-auto overflow-x-hidden w-64 shrink-0">
-      <div className="p-4 border-b border-slate-300/20 flex items-center gap-3">
-        <img className="w-10 h-11" src="/logo.svg" alt="NusaQC Logo" />
+    <aside className="h-screen sticky top-0 bg-slate-900 flex flex-col shadow-lg overflow-y-auto overflow-x-hidden w-64 shrink-0 border-r border-slate-800">
+      <div className="h-16 px-4 border-b border-slate-800 flex items-center gap-3 bg-slate-950">
+        <img className="w-8 h-8 object-contain" src="/logo.svg" alt="NusaQC Logo" />
         <div className="flex flex-col">
-          <span className="text-white text-xl font-bold font-sans leading-7">
+          <span className="text-white text-lg font-bold font-sans leading-tight">
             NusaQC
           </span>
-          <span className="text-white/60 text-[10px] font-semibold font-sans uppercase tracking-wider">
+          <span className="text-sky-400 text-[10px] font-bold font-sans uppercase tracking-wider">
             Fish Processing AI
           </span>
         </div>

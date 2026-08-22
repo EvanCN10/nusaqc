@@ -5,8 +5,6 @@ import { HeadSection } from "@/components/sections/dashboard-page/HeadSection";
 import { BodySection } from "@/components/sections/dashboard-page/BodySection";
 import { fetchDashboardStats, fetchRecentLots, fetchHardwareStatus } from "@/lib/api";
 import { DashboardStats, LotRecord, HardwareStatus as HardwareStatusType } from "@/types";
-import { RefreshCw, Radio, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -87,48 +85,6 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
-      {/* Dashboard Sub-header with Live Status Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-lg shadow-xs border border-slate-200">
-        <div className="flex items-center gap-3">
-          <div className="size-9 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-700">
-            <Sparkles className="size-4" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold font-sans text-zinc-900 leading-tight">
-              Real-Time QC Monitoring Dashboard
-            </h1>
-            <p className="text-xs font-sans text-gray-500">
-              Sistem Otomasi Sortasi Mutu Ikan Segar & Deteksi Cacat Permukaan (SNI 2729:2013)
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Live WS Pill */}
-          <div
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-medium border ${
-              wsConnected
-                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                : "bg-amber-50 text-amber-700 border-amber-200"
-            }`}
-          >
-            <Radio className={`size-3 ${wsConnected ? "animate-pulse text-emerald-600" : "text-amber-500"}`} />
-            <span>{wsConnected ? "WebSocket LIVE" : "Polling Mode"}</span>
-          </div>
-
-          <Button
-            variant="outline-sky"
-            size="sm"
-            onClick={() => loadAllData(true)}
-            disabled={isLoading}
-            className="flex items-center gap-1.5 h-8 text-xs cursor-pointer"
-          >
-            <RefreshCw className={`size-3.5 ${isLoading ? "animate-spin" : ""}`} />
-            <span>Refresh</span>
-          </Button>
-        </div>
-      </div>
-
       {/* KPI Stat Cards */}
       <HeadSection stats={stats} isLoading={isLoading} />
 
