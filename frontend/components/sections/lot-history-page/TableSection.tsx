@@ -123,7 +123,7 @@ export const TableSection = ({
                 Timestamp
               </th>
               <th className="w-36 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
-                Famili Ikan
+                Jenis Ikan
               </th>
               <th className="w-24 px-4 py-3 text-center text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
                 Grade (SNI)
@@ -162,7 +162,7 @@ export const TableSection = ({
                       Tidak ada catatan yang sesuai dengan filter.
                     </span>
                     <span className="text-xs font-sans text-gray-400">
-                      Coba reset kata kunci pencarian atau famili ikan.
+                      Coba reset kata kunci pencarian atau jenis ikan.
                     </span>
                   </div>
                 </td>

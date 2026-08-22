@@ -270,8 +270,8 @@ export const ResultDetail = ({ lotId }: ResultDetailProps) => {
         <div className="p-5 bg-white rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-slate-300 flex flex-col gap-3">
           <div className="grid grid-cols-3 gap-3 text-xs">
             <div className="p-2.5 bg-slate-50 rounded-sm border border-slate-100">
-              <span className="font-semibold text-gray-500 uppercase tracking-wider block">Famili Ikan</span>
-              <span className="font-sans font-bold text-zinc-900 mt-0.5 block">{lot.fishFamily || lot.fish_family || "Scombridae"}</span>
+              <span className="font-semibold text-gray-500 uppercase tracking-wider block">Jenis Ikan</span>
+              <span className="font-sans font-bold text-zinc-900 mt-0.5 block">{lot.fishFamily || lot.fish_family || "Tuna"}</span>
             </div>
             <div className="p-2.5 bg-slate-50 rounded-sm border border-slate-100">
               <span className="font-semibold text-gray-500 uppercase tracking-wider block">Waktu Inspeksi</span>

@@ -19,10 +19,13 @@ import { Button } from "@/components/ui/Button";
 import { runInspection } from "@/lib/api";
 import { InspectionResult } from "@/types";
 
-export const FISH_FAMILIES = [
-  { id: "Scombridae", label: "Scombridae (Tuna, Mackerel / Kembung, Tongkol)" },
-  { id: "Cichlidae", label: "Cichlidae (Tilapia / Nila)" },
+export const FISH_TYPES = [
+  { id: "Tuna", label: "Tuna (Thunnini / Tuna)" },
+  { id: "Mackarel", label: "Mackarel (Scomber / Mackarel / Kembung)" },
+  { id: "Nila", label: "Nila (Oreochromis niloticus / Tilapia)" },
 ];
+
+export const FISH_FAMILIES = FISH_TYPES;
 
 // Color mapping for defect bounding boxes
 const DEFECT_COLOR_MAP: Record<string, { border: string; bg: string; text: string }> = {
@@ -49,7 +52,7 @@ export const FishInspection = ({
 }: FishInspectionProps) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedFamily, setSelectedFamily] = useState<string>("Scombridae");
+  const [selectedFishType, setSelectedFishType] = useState<string>("Tuna");
   const [imageDimensions, setImageDimensions] = useState<{ naturalWidth: number; naturalHeight: number } | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -220,14 +223,14 @@ export const FishInspection = ({
       if (!fileToSend && previewUrl) {
         const response = await fetch(previewUrl);
         const blob = await response.blob();
-        fileToSend = new File([blob], `fish_${selectedFamily.toLowerCase()}.jpg`, { type: "image/jpeg" });
+        fileToSend = new File([blob], `fish_${selectedFishType.toLowerCase()}.jpg`, { type: "image/jpeg" });
       }
 
       if (!fileToSend) {
         throw new Error("Berkas gambar tidak ditemukan.");
       }
 
-      const result = await runInspection(fileToSend, selectedFamily);
+      const result = await runInspection(fileToSend, selectedFishType);
       onInspectionComplete?.(result);
     } catch (err: any) {
       const msg = err?.message || "Gagal melakukan inspeksi AI. Pastikan backend aktif.";
@@ -470,18 +473,18 @@ export const FishInspection = ({
         onChange={handleFileChange}
       />
 
-      {/* Controls Row: Fish Family Selector */}
+      {/* Controls Row: Fish Type Selector */}
       <div className="flex items-end gap-4 pt-2 border-t border-slate-100">
         <div className="flex-1 flex flex-col gap-1">
           <label className="text-xs font-bold font-sans text-gray-700 tracking-wide">
-            Famili Ikan (Traceability Category)
+            Jenis Ikan (Fish Type Category)
           </label>
           <select
-            value={selectedFamily}
-            onChange={(e) => setSelectedFamily(e.target.value)}
+            value={selectedFishType}
+            onChange={(e) => setSelectedFishType(e.target.value)}
             className="w-full px-3 py-2 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 text-sm font-sans font-medium text-zinc-900 cursor-pointer focus:outline-sky-500"
           >
-            {FISH_FAMILIES.map((f) => (
+            {FISH_TYPES.map((f) => (
               <option key={f.id} value={f.id} className="font-sans text-zinc-900">
                 {f.label}
               </option>

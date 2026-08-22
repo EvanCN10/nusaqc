@@ -17,13 +17,13 @@ router = APIRouter()
 )
 async def run_inspection(
     image: UploadFile = File(..., description="Snapshot image file of the fish on conveyor"),
-    fish_family: Optional[str] = Form(None, description="Fish biological family (e.g. Scombridae)"),
+    fish_family: Optional[str] = Form(None, description="Fish type (e.g. Tuna, Mackarel, Nila)"),
     family: Optional[str] = Form(None, description="Frontend alias for fish_family"),
     lot_id: Optional[str] = Form(None, description="Optional custom lot identifier"),
     db: Session = Depends(get_db)
 ):
 
-    selected_family = family or fish_family or "Scombridae"  # Default to Scombridae if not provided
+    selected_family = family or fish_family or "Tuna"  # Default to Tuna if not provided
 
     # Validate image file type
     if not image.content_type.startswith("image/"):

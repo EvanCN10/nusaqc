@@ -3,11 +3,14 @@
 import React from "react";
 import { Search, ChevronDown, Download, RotateCcw } from "lucide-react";
 
-const FAMILIES = [
-  { value: "all", label: "Semua Famili Ikan" },
-  { value: "Scombridae", label: "Scombridae (Tuna / Mackerel)" },
-  { value: "Cichlidae", label: "Cichlidae (Tilapia / Nila)" },
+const FISH_TYPES = [
+  { value: "all", label: "Semua Jenis Ikan" },
+  { value: "Tuna", label: "Tuna" },
+  { value: "Mackarel", label: "Mackarel" },
+  { value: "Nila", label: "Nila" },
 ];
+
+const FAMILIES = FISH_TYPES;
 
 const GRADES = [
   { value: "all", label: "Semua Grade Mutu" },
@@ -67,7 +70,7 @@ export const SearchHistory = ({
           Inspection History & Quality Audit Logs
         </h1>
         <p className="text-xs font-sans text-gray-500 mt-0.5">
-          Seluruh rekaman log hasil inferensi AI, skor mutu organoleptik SNI 2729:2013, famili ikan, dan lokalisasi defek.
+          Seluruh rekaman log hasil inferensi AI, skor mutu organoleptik SNI 2729:2013, jenis ikan, dan lokalisasi defek.
         </p>
       </div>
 
@@ -87,14 +90,14 @@ export const SearchHistory = ({
             />
           </div>
 
-          {/* Fish Family Filter */}
+          {/* Fish Type Filter */}
           <div className="relative">
             <select
               value={family}
               onChange={(e) => onFamilyChange(e.target.value)}
               className="w-full px-3 py-2 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 appearance-none pr-9 text-sm font-sans text-zinc-900 cursor-pointer focus:outline-sky-500"
             >
-              {FAMILIES.map((opt) => (
+              {FISH_TYPES.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>

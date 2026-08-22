@@ -252,7 +252,7 @@ export const CreateDispatchModal = ({
                 availableLots.map((lot) => {
                   const lid = lot.lotId || lot.lot_id || `LOT-${lot.id}`;
                   const isChecked = selectedLotIds.includes(lid);
-                  const fam = lot.fishFamily || lot.fish_family || "Scombridae";
+                  const fam = lot.fishFamily || lot.fish_family || "Tuna";
                   const gr = lot.grade || "A";
                   const confVal = Math.round(
                     lot.confidence !== undefined

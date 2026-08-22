@@ -153,7 +153,7 @@ export default function DispatchDetailPage() {
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
                   <th className="px-3 py-2.5 text-left font-bold text-gray-600">Lot ID</th>
-                  <th className="px-3 py-2.5 text-left font-bold text-gray-600">Fish Family</th>
+                  <th className="px-3 py-2.5 text-left font-bold text-gray-600">Jenis Ikan</th>
                   <th className="px-3 py-2.5 text-center font-bold text-gray-600">Grade</th>
                   <th className="px-3 py-2.5 text-left font-bold text-gray-600">Defects</th>
                   <th className="px-3 py-2.5 text-left font-bold text-gray-600">Confidence</th>
@@ -170,7 +170,7 @@ export default function DispatchDetailPage() {
                 ) : (
                   lots.map((lot, idx) => {
                     const lid = lot.lotId || lot.lot_id;
-                    const fam = lot.fishFamily || lot.fish_family || "Scombridae";
+                    const fam = lot.fishFamily || lot.fish_family || "Tuna";
                     const gr = lot.grade || "A";
                     const defCount = lot.defectsCount ?? lot.defects_count ?? 0;
                     const conf = Math.round(

@@ -41,7 +41,7 @@ export const SlotDetailDrawer = ({
 
   const lot = slot.lot;
   const lotId = slot.lotId || slot.lot_id || lot?.lotId || lot?.lot_id || "N/A";
-  const fishFamily = lot?.fishFamily || lot?.fish_family || lot?.family || "Scombridae";
+  const fishFamily = lot?.fishFamily || lot?.fish_family || lot?.family || "Tuna";
   const grade = lot?.grade || "A";
   const conf = lot
     ? Math.round(
@@ -102,10 +102,10 @@ export const SlotDetailDrawer = ({
               </span>
             </div>
 
-            {/* Fish Family */}
+            {/* Fish Type */}
             <div className="flex flex-col">
               <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                FISH FAMILY
+                JENIS IKAN
               </span>
               <span className="text-base font-semibold text-zinc-800 mt-0.5">
                 {fishFamily}
