@@ -85,6 +85,17 @@ export async function fetchLotDetail(lotId: string): Promise<LotRecord> {
 
 export const fetchLotById = fetchLotDetail;
 
+export async function deleteLot(lotId: string): Promise<{ status: string; message: string }> {
+  const res = await fetch(`${API_BASE}/api/v1/lots/${lotId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: `Failed to delete lot '${lotId}'` }));
+    throw new Error(err.detail || `Failed to delete lot '${lotId}'`);
+  }
+  return res.json();
+}
+
 export async function fetchHardwareStatus(): Promise<HardwareStatus> {
   const res = await fetch(`${API_BASE}/api/v1/hardware/status`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch hardware status");

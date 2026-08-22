@@ -1,4 +1,5 @@
 import io
+import os
 import csv
 import json
 from datetime import datetime
@@ -8,10 +9,10 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
+from app.config import settings
 from app.api.deps import get_db
 from app.models.inspection_record import InspectionRecord
-
-# TODO: Check if the logic on the lots api correct or not
+from app.models.storage_slot import StorageSlot
 
 router = APIRouter()
 
@@ -262,4 +263,48 @@ def get_lot_by_id(
         "image_path": record.image_path,
         "imageUrl": record.image_path,
         "defects": raw_defects
-    } 
+    }
+
+
+@router.delete(
+    "/{lot_id}",
+    summary="Delete Lot Inspection Record",
+    description="Deletes an inspection record by lot_id, unassigns any storage slot holding it, and removes stored image."
+)
+def delete_lot_by_id(
+    lot_id: str,
+    db: Session = Depends(get_db)
+):
+    record = db.query(InspectionRecord).filter(InspectionRecord.lot_id == lot_id).first()
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lot record '{lot_id}' not found."
+        )
+
+    # 1. Unassign from storage slots if occupied
+    slots = db.query(StorageSlot).filter(StorageSlot.lot_id == lot_id).all()
+    for slot in slots:
+        slot.lot_id = None
+        slot.assigned_at = None
+
+    # 2. Try to remove image file if stored locally in uploads
+    if record.image_path and record.image_path.startswith("/uploads/"):
+        filename = record.image_path.replace("/uploads/", "")
+        file_path = os.path.join(settings.UPLOAD_DIR, filename)
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except OSError:
+                pass
+
+    # 3. Delete inspection record
+    db.delete(record)
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": f"Lot record '{lot_id}' deleted successfully.",
+        "lot_id": lot_id
+    }
+ 
