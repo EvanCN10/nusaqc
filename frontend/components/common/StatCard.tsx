@@ -50,10 +50,10 @@ export const StatCard = ({
                 deltaPositive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
               }`}
             >
-              {deltaPositive ? (
-                <TrendingUp className="size-3" />
+              {delta.startsWith("+") || (!delta.startsWith("-") && parseFloat(delta) >= 0) ? (
+                <TrendingUp className="size-3 stroke-[2.5]" />
               ) : (
-                <TrendingDown className="size-3" />
+                <TrendingDown className="size-3 stroke-[2.5]" />
               )}
               {delta}
             </span>

@@ -50,7 +50,21 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
     pass_rate = round((passed_count / total_today) * 100, 1)
     fail_rate = round((failed_count / total_today) * 100, 1)
 
-    # Average Confidence
+    # Calculate Real Delta comparing Today vs Historical Baseline (Prior records)
+    historical_query = db.query(InspectionRecord).filter(InspectionRecord.timestamp < today_start)
+    hist_total = historical_query.count()
+    if hist_total > 0:
+        hist_passed = historical_query.filter(InspectionRecord.decision == "PASS").count()
+        hist_failed = historical_query.filter(InspectionRecord.decision == "FAIL").count()
+        hist_pass_rate = (hist_passed / hist_total) * 100
+        hist_fail_rate = (hist_failed / hist_total) * 100
+        pass_rate_delta = round(pass_rate - hist_pass_rate, 1)
+        fail_rate_delta = round(fail_rate - hist_fail_rate, 1)
+    else:
+        pass_rate_delta = 0.0
+        fail_rate_delta = 0.0
+
+    # Average Confidence (strictly from Model 1 & 2 AI inference outputs)
     avg_conf = db.query(func.avg(InspectionRecord.grade_confidence)).filter(
         InspectionRecord.timestamp >= today_start
     ).scalar() or 0.90
@@ -67,12 +81,12 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
         "currentLotId": current_lot_id,
         "pass_rate": pass_rate,
         "passRate": pass_rate,
-        "pass_rate_delta": 2.4,  # Placeholder for future delta calculation
-        "passRateDelta": 2.4,    # Placeholder for future delta calculation
+        "pass_rate_delta": pass_rate_delta,
+        "passRateDelta": pass_rate_delta,
         "fail_rate": fail_rate,
         "failRate": fail_rate,
-        "fail_rate_delta": -1.2,
-        "failRateDelta": -1.2,
+        "fail_rate_delta": fail_rate_delta,
+        "failRateDelta": fail_rate_delta,
         "avg_confidence": avg_confidence,
         "avgConfidence": avg_confidence,
         "avg_confidence_score": avg_confidence
