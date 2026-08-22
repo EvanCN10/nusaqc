@@ -1,4 +1,12 @@
-import { InspectionResult, LotRecord, DashboardStats, HardwareStatus } from "@/types";
+import {
+  InspectionResult,
+  LotRecord,
+  DashboardStats,
+  HardwareStatus,
+  StorageOverview,
+  StorageSlot,
+  DispatchRecord,
+} from "@/types";
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -120,4 +128,102 @@ export function getExportCsvUrl(params?: { from?: string; to?: string; family?: 
   if (params?.to) query.set("to", params.to);
   if (params?.family) query.set("family", params.family);
   return `${API_BASE}/api/v1/lots/export/csv?${query.toString()}`;
+}
+
+// ----------------------------------------------------
+// STORAGE API METHODS
+// ----------------------------------------------------
+
+export async function fetchStorageSlots(): Promise<StorageOverview> {
+  const res = await fetch(`${API_BASE}/api/v1/storage/slots`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch storage slots");
+  return res.json();
+}
+
+export async function fetchPendingStorageLots(): Promise<LotRecord[]> {
+  const res = await fetch(`${API_BASE}/api/v1/storage/pending`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch pending storage lots");
+  return res.json();
+}
+
+export async function assignStorageSlot(slotId: string, lotId: string) {
+  const res = await fetch(`${API_BASE}/api/v1/storage/assign`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slot_id: slotId, lot_id: lotId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Failed to assign slot" }));
+    throw new Error(err.detail || "Failed to assign storage slot");
+  }
+  return res.json();
+}
+
+export async function clearStorageSlot(slotId: string) {
+  const res = await fetch(`${API_BASE}/api/v1/storage/slots/${slotId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error(`Failed to clear slot ${slotId}`);
+  return res.json();
+}
+
+// ----------------------------------------------------
+// DISPATCH API METHODS
+// ----------------------------------------------------
+
+export async function fetchDispatches(): Promise<{
+  total_dispatches: number;
+  totalDispatches?: number;
+  pending: number;
+  in_transit?: number;
+  inTransit?: number;
+  dispatched: number;
+  delivered: number;
+  items: DispatchRecord[];
+}> {
+  const res = await fetch(`${API_BASE}/api/v1/dispatch`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch dispatches");
+  return res.json();
+}
+
+export async function fetchAvailableLotsForDispatch(): Promise<LotRecord[]> {
+  const res = await fetch(`${API_BASE}/api/v1/dispatch/available-lots`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch available lots for dispatch");
+  return res.json();
+}
+
+export async function fetchDispatchDetail(dispatchId: string): Promise<DispatchRecord> {
+  const res = await fetch(`${API_BASE}/api/v1/dispatch/${dispatchId}`, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Failed to fetch dispatch ${dispatchId}`);
+  return res.json();
+}
+
+export async function createDispatch(payload: {
+  buyer_name: string;
+  destination: string;
+  container_no?: string;
+  dispatch_date?: string;
+  lot_ids: string[];
+  notes?: string;
+}) {
+  const res = await fetch(`${API_BASE}/api/v1/dispatch`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Failed to create dispatch" }));
+    throw new Error(err.detail || "Failed to create dispatch");
+  }
+  return res.json();
+}
+
+export async function updateDispatchStatus(dispatchId: string, status: "pending" | "in_transit" | "delivered" | string) {
+  const res = await fetch(`${API_BASE}/api/v1/dispatch/${dispatchId}/status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error(`Failed to update dispatch status to ${status}`);
+  return res.json();
 }

@@ -13,9 +13,8 @@ if hasattr(sys.stdout, 'reconfigure'):
 
 from app.config import settings
 from app.core.database import Base, engine
+import app.models
 from app.core.websocket import ws_manager
-import app.models.inspection_record
-import app.models.system_setting
 from app.api.v1.router import api_v1_router
 
 @asynccontextmanager
