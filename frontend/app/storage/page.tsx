@@ -11,9 +11,6 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
-  Wifi,
-  Bell,
-  User,
   ExternalLink,
 } from "lucide-react";
 import {
@@ -139,29 +136,14 @@ export default function StoragePage() {
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black font-sans text-zinc-900 tracking-tight">
-            Lot Storage
-          </h1>
-          <p className="text-xs font-sans text-gray-500 mt-0.5">
-            Peta penempatan slot penyimpanan ikan pasca-inspeksi mutu (Cold & Frozen Storage).
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 rounded-full text-xs font-semibold text-emerald-700">
-            <Wifi className="size-3.5" />
-            <span>AI Camera: Online</span>
-          </div>
-          <button type="button" className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-gray-600 cursor-pointer">
-            <Bell className="size-4" />
-          </button>
-          <div className="size-8 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-xs font-sans">
-            QC
-          </div>
-        </div>
+      {/* Page Title & Subtitle */}
+      <div className="flex flex-col">
+        <h1 className="text-2xl font-black font-sans text-zinc-900 tracking-tight">
+          Cold & Frozen Storage Map
+        </h1>
+        <p className="text-xs font-sans text-gray-500 mt-0.5">
+          Peta penempatan slot penyimpanan ikan pasca-inspeksi mutu (Cold & Frozen Storage).
+        </p>
       </div>
 
       {/* Notification Toast */}
