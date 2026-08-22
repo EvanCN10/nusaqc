@@ -1,10 +1,15 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Camera, Plus, Loader2, RefreshCw, AlertCircle, Sparkles, CheckCircle2 } from "lucide-react";
+import { Camera, Plus, Loader2, RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { runInspection } from "@/lib/api";
 import { InspectionResult } from "@/types";
+
+export const FISH_FAMILIES = [
+  { id: "Scombridae", label: "Scombridae (Tuna, Mackerel / Kembung, Tongkol)" },
+  { id: "Cichlidae", label: "Cichlidae (Tilapia / Nila)" },
+];
 
 // Color mapping for defect bounding boxes
 const DEFECT_COLOR_MAP: Record<string, { border: string; bg: string; text: string }> = {
@@ -31,6 +36,7 @@ export const FishInspection = ({
 }: FishInspectionProps) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFamily, setSelectedFamily] = useState<string>("Scombridae");
   const [imageDimensions, setImageDimensions] = useState<{ naturalWidth: number; naturalHeight: number } | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -60,7 +66,7 @@ export const FishInspection = ({
     const img = e.currentTarget;
     setImageDimensions({
       naturalWidth: img.naturalWidth || 640,
-      naturalHeight: img.naturalHeight || 640,
+      naturalHeight: img.naturalHeight || 480,
     });
   };
 
@@ -70,92 +76,6 @@ export const FishInspection = ({
     setImageDimensions(null);
     setLocalError(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  // Quick Demo Fish Generator for rapid testing without external files
-  const handleLoadSampleCanvas = (type: "healthy" | "defect") => {
-    setLocalError(null);
-    const canvas = document.createElement("canvas");
-    canvas.width = 640;
-    canvas.height = 480;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Gradient background simulating stainless conveyor
-    const bgGradient = ctx.createLinearGradient(0, 0, 640, 480);
-    bgGradient.addColorStop(0, "#cbd5e1");
-    bgGradient.addColorStop(1, "#94a3b8");
-    ctx.fillStyle = bgGradient;
-    ctx.fillRect(0, 0, 640, 480);
-
-    // Draw conveyor grid lines
-    ctx.strokeStyle = "#64748b";
-    ctx.lineWidth = 1;
-    for (let x = 0; x < 640; x += 40) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, 480);
-      ctx.stroke();
-    }
-
-    // Fish Body
-    ctx.save();
-    ctx.translate(320, 240);
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 210, 75, 0, 0, 2 * Math.PI);
-    const fishGradient = ctx.createLinearGradient(-200, 0, 200, 0);
-    fishGradient.addColorStop(0, type === "healthy" ? "#0284c7" : "#0369a1");
-    fishGradient.addColorStop(0.5, type === "healthy" ? "#e0f2fe" : "#fed7aa");
-    fishGradient.addColorStop(1, type === "healthy" ? "#38bdf8" : "#94a3b8");
-    ctx.fillStyle = fishGradient;
-    ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "#1e293b";
-    ctx.stroke();
-
-    // Fish Eye
-    ctx.beginPath();
-    ctx.arc(140, -15, 12, 0, 2 * Math.PI);
-    ctx.fillStyle = type === "healthy" ? "#000000" : "#7f1d1d";
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(143, -17, 4, 0, 2 * Math.PI);
-    ctx.fillStyle = "#ffffff";
-    ctx.fill();
-
-    // Fish Tail
-    ctx.beginPath();
-    ctx.moveTo(-190, 0);
-    ctx.lineTo(-260, -50);
-    ctx.lineTo(-240, 0);
-    ctx.lineTo(-260, 50);
-    ctx.closePath();
-    ctx.fillStyle = "#0284c7";
-    ctx.fill();
-    ctx.stroke();
-
-    // If defective, paint a simulated red lesion / color defect
-    if (type === "defect") {
-      ctx.beginPath();
-      ctx.ellipse(-20, 10, 35, 20, 0.2, 0, 2 * Math.PI);
-      ctx.fillStyle = "rgba(220, 38, 38, 0.85)";
-      ctx.fill();
-
-      // Slime spot
-      ctx.beginPath();
-      ctx.ellipse(60, -10, 25, 12, -0.3, 0, 2 * Math.PI);
-      ctx.fillStyle = "rgba(168, 85, 247, 0.7)";
-      ctx.fill();
-    }
-    ctx.restore();
-
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const file = new File([blob], `sample_${type}_fish.jpg`, { type: "image/jpeg" });
-      setSelectedFile(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-    }, "image/jpeg", 0.95);
   };
 
   const handleRunInspection = async () => {
@@ -170,17 +90,16 @@ export const FishInspection = ({
     try {
       let fileToSend = selectedFile;
       if (!fileToSend && previewUrl) {
-        // Fetch blob from previewUrl if generated from demo
         const response = await fetch(previewUrl);
         const blob = await response.blob();
-        fileToSend = new File([blob], `fish_sample.jpg`, { type: "image/jpeg" });
+        fileToSend = new File([blob], `fish_${selectedFamily.toLowerCase()}.jpg`, { type: "image/jpeg" });
       }
 
       if (!fileToSend) {
         throw new Error("Berkas gambar tidak ditemukan.");
       }
 
-      const result = await runInspection(fileToSend, "Universal");
+      const result = await runInspection(fileToSend, selectedFamily);
       onInspectionComplete?.(result);
     } catch (err: any) {
       const msg = err?.message || "Gagal melakukan inspeksi AI. Pastikan backend aktif.";
@@ -197,9 +116,22 @@ export const FishInspection = ({
           <Camera className="size-5 text-sky-700" />
           <h2 className="text-xl font-bold font-sans text-zinc-900">Fish Inspection</h2>
         </div>
-        <span className="text-xs font-mono px-2.5 py-1 bg-sky-50 text-sky-700 rounded-full font-medium border border-sky-200">
-          Dual ONNX Runtime (CPU)
-        </span>
+        <div className="flex items-center gap-2">
+          {previewUrl && (
+            <Button
+              variant="outline-sky"
+              onClick={handleReInspect}
+              disabled={isLoading}
+              className="h-[30px] px-2.5 text-xs flex items-center gap-1 cursor-pointer"
+            >
+              <RefreshCw className="size-3" />
+              <span>Ganti Foto</span>
+            </Button>
+          )}
+          <span className="text-xs font-mono px-2.5 py-1 bg-sky-50 text-sky-700 rounded-full font-medium border border-sky-200">
+            Dual ONNX Runtime (CPU)
+          </span>
+        </div>
       </div>
 
       {/* Error Alert Banner */}
@@ -302,39 +234,24 @@ export const FishInspection = ({
         onChange={handleFileChange}
       />
 
-      {/* Quick Demo Sample Picker */}
-      <div className="flex items-center justify-between pt-1 border-t border-slate-100">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-gray-500 font-sans flex items-center gap-1">
-            <Sparkles className="size-3 text-amber-500" /> Demo Sample:
-          </span>
-          <button
-            type="button"
-            onClick={() => handleLoadSampleCanvas("healthy")}
-            className="text-xs px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 rounded-sm font-medium hover:bg-green-100 transition-colors cursor-pointer"
+      {/* Controls Row: Fish Family Selector */}
+      <div className="flex items-end gap-4 pt-2 border-t border-slate-100">
+        <div className="flex-1 flex flex-col gap-1">
+          <label className="text-xs font-bold font-sans text-gray-700 tracking-wide">
+            Famili Ikan (Traceability Category)
+          </label>
+          <select
+            value={selectedFamily}
+            onChange={(e) => setSelectedFamily(e.target.value)}
+            className="w-full px-3 py-2 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 text-sm font-sans font-medium text-zinc-900 cursor-pointer focus:outline-sky-500"
           >
-            Ikan Segar (Grade A)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleLoadSampleCanvas("defect")}
-            className="text-xs px-2.5 py-1 bg-red-50 text-red-700 border border-red-200 rounded-sm font-medium hover:bg-red-100 transition-colors cursor-pointer"
-          >
-            Ikan Cacat (Defect)
-          </button>
+            {FISH_FAMILIES.map((f) => (
+              <option key={f.id} value={f.id} className="font-sans text-zinc-900">
+                {f.label}
+              </option>
+            ))}
+          </select>
         </div>
-
-        {previewUrl && (
-          <Button
-            variant="outline-sky"
-            onClick={handleReInspect}
-            disabled={isLoading}
-            className="h-[32px] px-3 text-xs flex items-center gap-1.5"
-          >
-            <RefreshCw className="size-3.5" />
-            <span>Reset</span>
-          </Button>
-        )}
       </div>
 
       {/* Run Inspection Button */}

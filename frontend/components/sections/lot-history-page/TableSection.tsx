@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Loader2, Inbox, Eye, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Inbox, Eye } from "lucide-react";
 import { GradeBadge } from "@/components/common/GradeBadge";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { fetchLots } from "@/lib/api";
@@ -10,6 +10,7 @@ import { LotRecord } from "@/types";
 
 type TableSectionProps = {
   search?: string;
+  family?: string;
   grade?: string;
   decision?: string;
   dateFrom?: string;
@@ -36,6 +37,7 @@ function formatFullTimestamp(ts?: string): string {
 
 export const TableSection = ({
   search = "",
+  family = "all",
   grade = "all",
   decision = "all",
   dateFrom = "",
@@ -55,6 +57,7 @@ export const TableSection = ({
         page,
         limit,
         search: search || undefined,
+        family: family !== "all" ? family : undefined,
         grade: grade !== "all" ? grade : undefined,
         decision: decision !== "all" ? decision : undefined,
         date_from: dateFrom || undefined,
@@ -72,12 +75,12 @@ export const TableSection = ({
     } finally {
       setIsLoading(false);
     }
-  }, [page, limit, search, grade, decision, dateFrom, dateTo]);
+  }, [page, limit, search, family, grade, decision, dateFrom, dateTo]);
 
   // Reset to page 1 whenever filters change
   useEffect(() => {
     setPage(1);
-  }, [search, grade, decision, dateFrom, dateTo]);
+  }, [search, family, grade, decision, dateFrom, dateTo]);
 
   useEffect(() => {
     loadData();
@@ -113,11 +116,14 @@ export const TableSection = ({
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="w-52 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
+              <th className="w-48 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
                 Lot ID
               </th>
-              <th className="w-44 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
+              <th className="w-40 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
                 Timestamp
+              </th>
+              <th className="w-36 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
+                Famili Ikan
               </th>
               <th className="w-24 px-4 py-3 text-center text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
                 Grade (SNI)
@@ -128,7 +134,7 @@ export const TableSection = ({
               <th className="w-32 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
                 Keputusan
               </th>
-              <th className="w-28 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
+              <th className="w-24 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
                 Confidence
               </th>
               <th className="w-24 px-4 py-3 text-right text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
@@ -140,7 +146,7 @@ export const TableSection = ({
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={7} className="px-4 py-16 text-center text-gray-500">
+                <td colSpan={8} className="px-4 py-16 text-center text-gray-500">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Loader2 className="size-7 animate-spin text-sky-600" />
                     <span className="text-xs font-medium font-sans">Memuat data log inspeksi...</span>
@@ -149,14 +155,14 @@ export const TableSection = ({
               </tr>
             ) : lots.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-16 text-center text-gray-500">
+                <td colSpan={8} className="px-4 py-16 text-center text-gray-500">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Inbox className="size-8 text-slate-300" />
                     <span className="text-sm font-semibold font-sans text-zinc-700">
                       Tidak ada catatan yang sesuai dengan filter.
                     </span>
                     <span className="text-xs font-sans text-gray-400">
-                      Coba reset kata kunci pencarian atau tanggal inspeksi.
+                      Coba reset kata kunci pencarian atau famili ikan.
                     </span>
                   </div>
                 </td>
@@ -164,6 +170,7 @@ export const TableSection = ({
             ) : (
               lots.map((lot, index) => {
                 const rowLotId = lot.lotId || lot.lot_id || `LOT-${lot.id}`;
+                const rowFamily = lot.fishFamily || lot.fish_family || lot.family || "Scombridae";
                 const rowGrade = lot.grade || "A";
                 const rowDecision = lot.decision || "PASS";
                 const rowDefects = lot.defectsCount ?? lot.defects_count ?? (lot.defects ? lot.defects.length : 0);
@@ -179,7 +186,7 @@ export const TableSection = ({
                     className={`${index !== 0 ? "border-t border-slate-100" : ""} hover:bg-slate-50 transition-colors`}
                   >
                     {/* Lot ID */}
-                    <td className="px-4 py-3.5 w-52">
+                    <td className="px-4 py-3.5 w-48">
                       <Link
                         href={`/history/${rowLotId}`}
                         className="text-xs font-bold font-mono text-sky-600 hover:text-sky-800 hover:underline"
@@ -189,8 +196,15 @@ export const TableSection = ({
                     </td>
 
                     {/* Timestamp */}
-                    <td className="px-4 py-3.5 w-44 text-xs font-mono text-gray-600">
+                    <td className="px-4 py-3.5 w-40 text-xs font-mono text-gray-600">
                       {formatFullTimestamp(lot.timestamp)}
+                    </td>
+
+                    {/* Fish Family */}
+                    <td className="px-4 py-3.5 w-36">
+                      <span className="text-xs font-medium font-sans text-zinc-800 bg-slate-100 px-2 py-0.5 rounded-sm border border-slate-200">
+                        {rowFamily}
+                      </span>
                     </td>
 
                     {/* Grade Badge */}
@@ -207,7 +221,7 @@ export const TableSection = ({
                             : "bg-emerald-50 text-emerald-700 border-emerald-200"
                         }`}
                       >
-                        {rowDefects} {rowDefects === 1 ? "defek" : "defek"}
+                        {rowDefects} defek
                       </span>
                     </td>
 
@@ -217,7 +231,7 @@ export const TableSection = ({
                     </td>
 
                     {/* Confidence */}
-                    <td className="px-4 py-3.5 w-28 text-xs font-bold font-mono text-zinc-900">
+                    <td className="px-4 py-3.5 w-24 text-xs font-bold font-mono text-zinc-900">
                       {rowConf}%
                     </td>
 

@@ -6,6 +6,7 @@ import { TableSection } from "@/components/sections/lot-history-page/TableSectio
 
 export default function HistoryPage() {
   const [search, setSearch] = useState("");
+  const [family, setFamily] = useState("all");
   const [grade, setGrade] = useState("all");
   const [decision, setDecision] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
@@ -13,6 +14,7 @@ export default function HistoryPage() {
 
   const handleClearFilters = () => {
     setSearch("");
+    setFamily("all");
     setGrade("all");
     setDecision("all");
     setDateFrom("");
@@ -24,6 +26,8 @@ export default function HistoryPage() {
       <SearchHistory
         search={search}
         onSearchChange={setSearch}
+        family={family}
+        onFamilyChange={setFamily}
         grade={grade}
         onGradeChange={setGrade}
         decision={decision}
@@ -36,6 +40,7 @@ export default function HistoryPage() {
       />
       <TableSection
         search={search}
+        family={family}
         grade={grade}
         decision={decision}
         dateFrom={dateFrom}

@@ -3,6 +3,12 @@
 import React from "react";
 import { Search, ChevronDown, Download, RotateCcw } from "lucide-react";
 
+const FAMILIES = [
+  { value: "all", label: "Semua Famili Ikan" },
+  { value: "Scombridae", label: "Scombridae (Tuna / Mackerel)" },
+  { value: "Cichlidae", label: "Cichlidae (Tilapia / Nila)" },
+];
+
 const GRADES = [
   { value: "all", label: "Semua Grade Mutu" },
   { value: "A", label: "Grade A (Prima / Ekspor)" },
@@ -20,6 +26,8 @@ const DECISIONS = [
 type SearchHistoryProps = {
   search: string;
   onSearchChange: (val: string) => void;
+  family: string;
+  onFamilyChange: (val: string) => void;
   grade: string;
   onGradeChange: (val: string) => void;
   decision: string;
@@ -34,6 +42,8 @@ type SearchHistoryProps = {
 export const SearchHistory = ({
   search,
   onSearchChange,
+  family,
+  onFamilyChange,
   grade,
   onGradeChange,
   decision,
@@ -57,28 +67,44 @@ export const SearchHistory = ({
           Inspection History & Quality Audit Logs
         </h1>
         <p className="text-xs font-sans text-gray-500 mt-0.5">
-          Seluruh rekaman log hasil inferensi AI, skor mutu organoleptik SNI 2729:2013, dan lokalisasi defek.
+          Seluruh rekaman log hasil inferensi AI, skor mutu organoleptik SNI 2729:2013, famili ikan, dan lokalisasi defek.
         </p>
       </div>
 
       {/* Search & Filter Card */}
       <div className="w-full bg-white rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-slate-300 p-5 flex flex-col gap-4">
         {/* Row 1: Search Input & Dropdowns */}
-        <div className="flex flex-wrap items-center gap-3 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
           {/* Search Input */}
-          <div className="relative flex-1 min-w-[240px]">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Cari berdasarkan Lot ID (e.g. LOT-2026)..."
+              placeholder="Cari Lot ID (LOT-2026)..."
               className="w-full pl-9 pr-4 py-2 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 text-sm font-sans text-zinc-900 placeholder:text-gray-400 focus:outline-sky-500"
             />
           </div>
 
+          {/* Fish Family Filter */}
+          <div className="relative">
+            <select
+              value={family}
+              onChange={(e) => onFamilyChange(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 rounded-sm outline outline-1 outline-slate-300 appearance-none pr-9 text-sm font-sans text-zinc-900 cursor-pointer focus:outline-sky-500"
+            >
+              {FAMILIES.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none" />
+          </div>
+
           {/* Grade Filter */}
-          <div className="relative min-w-[180px]">
+          <div className="relative">
             <select
               value={grade}
               onChange={(e) => onGradeChange(e.target.value)}
@@ -94,7 +120,7 @@ export const SearchHistory = ({
           </div>
 
           {/* Decision Filter */}
-          <div className="relative min-w-[180px]">
+          <div className="relative">
             <select
               value={decision}
               onChange={(e) => onDecisionChange(e.target.value)}

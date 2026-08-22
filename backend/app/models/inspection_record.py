@@ -19,6 +19,13 @@ class InspectionRecord(Base):
     processing_time_ms = Column(Integer, default=0, nullable=False)
     image_path = Column(String(255), nullable=True)
 
+    # Storage and Dispatch Tracking
+    storage_slot = Column(String(20), nullable=True, index=True)
+    storage_zone = Column(String(20), nullable=True)                         # cold, frozen
+    stored_at = Column(DateTime, nullable=True)
+    dispatch_id = Column(String(50), nullable=True, index=True)
+    dispatched_at = Column(DateTime, nullable=True)
+
 
     # lot_id: string;
     # timestamp: string; // ISO 8601
