@@ -4,7 +4,7 @@ import csv
 import json
 from datetime import datetime
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -263,7 +263,95 @@ def get_lot_by_id(
         "processingTimeMs": record.processing_time_ms,
         "image_path": record.image_path,
         "imageUrl": record.image_path,
-        "defects": raw_defects
+        "defects": raw_defects,
+        "inspector_note": record.inspector_note or "",
+        "inspectorNote": record.inspector_note or "",
+        "reason_summary": record.reason_summary or ("Kualitas ikan memenuhi standar kelayakan ekspor (Grade " + record.grade + ")." if record.decision == "PASS" else ("Grade B dengan tingkat keyakinan moderat. Disarankan verifikasi visual operator." if record.decision == "CONDITIONAL" else "Terdeteksi defek fisik/kontaminasi pada permukaan ikan."))
+    }
+
+
+
+@router.patch(
+    "/{lot_id}/note",
+    summary="Update Inspector Note for a Lot Record",
+    description="Allows QC Supervisor to add/edit manual notes for an inspection lot."
+)
+async def update_lot_note(
+    lot_id: str,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    record = db.query(InspectionRecord).filter(InspectionRecord.lot_id == lot_id).first()
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lot record '{lot_id}' not found."
+        )
+
+    payload = await request.json()
+    note = payload.get("note") or payload.get("inspector_note") or payload.get("inspectorNote") or ""
+    record.inspector_note = str(note)
+    db.commit()
+    db.refresh(record)
+
+    return {
+        "status": "success",
+        "message": "Inspector note updated successfully",
+        "lot_id": lot_id,
+        "inspector_note": record.inspector_note
+    }
+
+
+@router.patch(
+    "/{lot_id}/override",
+    summary="Override AI QC Decision (Human-in-the-Loop)",
+    description="Allows QC Supervisor to override the AI decision (e.g. from FAIL to PASS, or CONDITIONAL to PASS)."
+)
+async def override_lot_decision(
+    lot_id: str,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    record = db.query(InspectionRecord).filter(InspectionRecord.lot_id == lot_id).first()
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lot record '{lot_id}' not found."
+        )
+
+    payload = await request.json()
+    new_decision = payload.get("decision") or payload.get("new_decision") or "PASS"
+    new_decision = new_decision.upper()
+    if new_decision not in ["PASS", "FAIL", "CONDITIONAL"]:
+        new_decision = "PASS"
+
+    override_reason = payload.get("reason") or "Manual supervisor override"
+
+    # Map hardware signal accordingly
+    if new_decision == "PASS":
+        record.hardware_signal = "GREEN"
+    elif new_decision == "CONDITIONAL":
+        record.hardware_signal = "YELLOW"
+    else:
+        record.hardware_signal = "RED"
+
+    record.decision = new_decision
+    existing_note = record.inspector_note or ""
+    override_log = f"[OVERRIDE -> {new_decision}] {override_reason}"
+    record.inspector_note = f"{existing_note}\n{override_log}".strip() if existing_note else override_log
+    record.reason_summary = f"Human-in-the-Loop Override: {override_reason}"
+
+    db.commit()
+    db.refresh(record)
+
+    return {
+        "status": "success",
+        "message": f"Lot decision overridden to {new_decision}",
+        "lot_id": lot_id,
+        "decision": record.decision,
+        "hardware_signal": record.hardware_signal,
+        "inspector_note": record.inspector_note,
+        "reason_summary": record.reason_summary
     }
 
 

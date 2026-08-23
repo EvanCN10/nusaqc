@@ -372,14 +372,15 @@ export default function DispatchDetailPage() {
               </div>
             </div>
 
-            {/* Export Summary Button */}
+            {/* Export Summary Button (Planned for Final) */}
             <button
               type="button"
-              onClick={handleExportCsv}
-              className="w-full py-2.5 rounded-sm border border-slate-300 bg-white hover:bg-slate-50 text-zinc-800 font-bold text-xs font-sans transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs mt-1"
+              disabled
+              title="Available in Final version"
+              className="w-full py-2.5 rounded-sm border border-slate-200 bg-slate-100 text-gray-400 font-bold text-xs font-sans flex items-center justify-center gap-2 cursor-not-allowed shadow-none mt-1"
             >
-              <Download className="size-4 text-gray-600" />
-              <span>Export Summary (CSV Manifest)</span>
+              <Download className="size-4 text-gray-400" />
+              <span>Export Summary (PDF)</span>
             </button>
           </div>
         </div>

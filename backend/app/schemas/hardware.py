@@ -19,7 +19,6 @@ class ConnectionTestResponse(BaseModel):
     latency_ms: Optional[int] = None
 
 
-# TODO: Check if above aligns with bot or not
 #   camera: "ONLINE" | "OFFLINE";
 #   conveyor_relay: "ACTIVE" | "INACTIVE";
 #   tower_light: "GREEN" | "YELLOW" | "RED";

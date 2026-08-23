@@ -5,7 +5,6 @@ from datetime import datetime
 class InspectionRecord(Base):
     __tablename__ = "inspections"
 
-    #  TODO: adjust the data types redundancy according the nnecessity of the real case
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     lot_id = Column(String(64), index=True, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -18,6 +17,8 @@ class InspectionRecord(Base):
     hardware_signal = Column(String(16), nullable=False)                    # GREEN, YELLOW, RED
     processing_time_ms = Column(Integer, default=0, nullable=False)
     image_path = Column(String(255), nullable=True)
+    inspector_note = Column(Text, nullable=True)
+    reason_summary = Column(Text, nullable=True)
 
     # Storage and Dispatch Tracking
     storage_slot = Column(String(20), nullable=True, index=True)

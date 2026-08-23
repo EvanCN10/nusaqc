@@ -41,6 +41,11 @@ export const AIModel = ({
   const freshModel = modelStatus?.freshness_model || modelStatus?.freshnessModel;
   const defectModel = modelStatus?.defect_model || modelStatus?.defectModel;
 
+  const normalizedThreshold =
+    confidenceThreshold <= 1.0
+      ? Math.round(confidenceThreshold * 100)
+      : Math.round(confidenceThreshold);
+
   return (
     <div className="w-full p-6 bg-white rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-slate-300 flex flex-col gap-6">
       {/* Section Header */}
@@ -120,7 +125,7 @@ export const AIModel = ({
           </div>
           <div className="px-2.5 py-1 bg-rose-50 border border-rose-200 rounded-sm">
             <span className="text-sm font-bold font-mono text-rose-700">
-              {confidenceThreshold}%
+              {normalizedThreshold}%
             </span>
           </div>
         </div>
@@ -131,7 +136,7 @@ export const AIModel = ({
             type="range"
             min="50"
             max="95"
-            value={confidenceThreshold}
+            value={normalizedThreshold}
             onChange={(e) => onConfidenceChange(Number(e.target.value))}
             className="w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-sky-700"
           />

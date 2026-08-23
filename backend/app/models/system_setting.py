@@ -5,7 +5,6 @@ from app.core.database import Base
 class SystemSetting(Base):
     __tablename__ = "system_settings"
 
-    # TODO: Check if there are really system settings variables implemented on Frontend
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     key = Column(String(64), unique=True, index=True, nullable=False)
     confidence_threshold = Column(Float, default=0.75, nullable=False)

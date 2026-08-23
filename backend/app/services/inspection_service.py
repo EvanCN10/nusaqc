@@ -12,10 +12,10 @@ from app.ai import get_ai_engine
 from app.hardware import get_hardware_controller
 from app.services.decision_engine import DecisionEngine
 from app.models.inspection_record import InspectionRecord
+from app.models.system_setting import SystemSetting
 from app.schemas.inspection import InspectionResultSchema, DefectSchema
 from app.core.websocket import ws_manager  # <--- Imported WebSocket Manager
 
-# TODO: Check if inspection service logic is proper and accurate according to the business rules and AI model outputs
 
 class InspectionService:
     @staticmethod
@@ -55,17 +55,24 @@ class InspectionService:
         grade = freshness_result["grade"]
         grade_confidence = freshness_result["confidence"]
 
+        # Fetch configured confidence threshold from settings
+        setting = db.query(SystemSetting).filter(SystemSetting.key == "global_config").first()
+        threshold = float(setting.confidence_threshold) if setting and setting.confidence_threshold is not None else 0.75
+
         raw_defects = ai_engine.predict_defects(pil_image)
+        # Filter defects by confidence threshold
         defects_schemas = [
             DefectSchema(label=d["label"], bbox=d["bbox"], confidence=d["confidence"])
             for d in raw_defects
+            if d.get("confidence", 1.0) >= threshold
         ]
 
         # 4. Decision Engine
         decision, hardware_signal, reason = DecisionEngine.evaluate(
             grade=grade,
             grade_confidence=grade_confidence,
-            defects=raw_defects
+            defects=[d.dict() for d in defects_schemas],
+            confidence_threshold=threshold
         )
 
         # 5. Hardware Actuation
@@ -87,7 +94,8 @@ class InspectionService:
             decision=decision,
             hardware_signal=hardware_signal,
             processing_time_ms=processing_time_ms,
-            image_path=image_url
+            image_path=image_url,
+            reason_summary=reason
         )
         db.add(db_record)
         db.commit()
@@ -106,7 +114,6 @@ class InspectionService:
             image_url=image_url
         )
 
-# TODO: Check if the WebSocket broadcasting logic is correct and aligns with the frontend expectations
 
         # 7. Real-Time Broadcast via WebSocket
         try:

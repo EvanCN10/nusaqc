@@ -6,14 +6,17 @@ class DecisionEngine:
     into factory actions (PASS / CONDITIONAL / FAIL) and hardware signals (GREEN / YELLOW / RED).
     """
 
-# TODO: Check if the decision engine logic is proper and accurate according to the business rules and AI model outputs
-
     @staticmethod
-    def evaluate(grade: str, grade_confidence: float, defects: List[Dict[str, Any]]) -> Tuple[str, str, str]:
+    def evaluate(
+        grade: str,
+        grade_confidence: float,
+        defects: List[Dict[str, Any]],
+        confidence_threshold: float = 0.75
+    ) -> Tuple[str, str, str]:
         """
         Evaluation Rules:
         - FAIL (RED): Grade C OR any physical defect detected (lesions, discoloration, scales, foreign objects, slime).
-        - CONDITIONAL (YELLOW): Grade B with no physical defects (requires secondary confirmation by operator).
+        - CONDITIONAL (YELLOW): Grade B with confidence below threshold (requires secondary confirmation by operator).
         - PASS (GREEN): Grade A (or high-confidence Grade B) with 0 physical defects.
         
         Returns: (decision, hardware_signal, reason_summary)
@@ -29,7 +32,7 @@ class DecisionEngine:
             return "FAIL", "RED", f"Terdeteksi {defects_count} kecacatan fisik/kontaminasi ({defect_labels})."
 
         # Rule 2: Secondary Inspection (CONDITIONAL)
-        if grade == "B" and grade_confidence < 0.85:
+        if grade == "B" and grade_confidence < confidence_threshold:
             return "CONDITIONAL", "YELLOW", "Grade B dengan tingkat keyakinan moderat. Disarankan verifikasi visual operator."
 
         # Rule 3: Quality Passed (PASS)

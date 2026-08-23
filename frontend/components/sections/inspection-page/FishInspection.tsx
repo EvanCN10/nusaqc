@@ -535,6 +535,11 @@ export const FishInspection = ({
           </>
         )}
       </Button>
+
+      {/* AI Governance Disclaimer */}
+      <p className="text-[11px] text-gray-400 font-sans text-center italic">
+        AI adalah sistem pendukung keputusan QC, bukan pengganti mutlak penilaian akhir operator manusia.
+      </p>
     </div>
   );
 };

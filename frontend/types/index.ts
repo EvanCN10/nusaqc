@@ -69,6 +69,10 @@ export interface LotRecord {
   dispatchId?: string;
   dispatched_at?: string;
   dispatchedAt?: string;
+  inspector_note?: string;
+  inspectorNote?: string;
+  reason_summary?: string;
+  reasonSummary?: string;
 }
 
 export interface DashboardStats {

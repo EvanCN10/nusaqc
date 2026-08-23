@@ -9,7 +9,6 @@ from app.config import settings
 
 router = APIRouter()
 
-# TODO: Check if the settings API endpoints are correct or not
 
 @router.get(
     "/models/status",

@@ -161,7 +161,6 @@ export const Hardware = ({
               <button
                 type="button"
                 onClick={() => {
-                  // TODO: Call POST /api/v1/hardware/test-connection with ipAddress payload
                   console.log("Testing hardware connection to:", ipAddress);
                 }}
                 className="px-4 py-2 rounded-md outline outline-1 outline-sky-700 text-sky-700 text-base font-bold font-sans hover:bg-sky-50 transition-colors cursor-pointer whitespace-nowrap"

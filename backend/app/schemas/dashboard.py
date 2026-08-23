@@ -8,7 +8,6 @@ class DashboardStatsSchema(BaseModel):
     fail_rate: float        # e.g., 5.8
     avg_confidence: float   # e.g., 91.5
 
-# TODO: Check if above aligns with bot or not
 #   total_inspected_today: number;
 #   current_lot_id: string;
 #   pass_rate: number;

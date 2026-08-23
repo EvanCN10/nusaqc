@@ -32,7 +32,6 @@ class InspectionResultSchema(BaseModel):
     class Config:
         from_attributes = True
 
-# TODO: Check if above aligns with bot or not
 # export type InspectionResult = {
 #   lot_id: string;
 #   timestamp: string; // ISO 8601

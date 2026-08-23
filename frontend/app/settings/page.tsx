@@ -35,7 +35,10 @@ export default function SettingsPage() {
           if (res.mock_mode_enabled !== undefined) setMockMode(Boolean(res.mock_mode_enabled));
           if (res.camera_source) setCameraSource(res.camera_source);
           if (res.raspberry_pi_ip) setIpAddress(res.raspberry_pi_ip);
-          if (res.confidence_threshold) setConfidenceThreshold(Number(res.confidence_threshold));
+          if (res.confidence_threshold !== undefined || res.confidenceThreshold !== undefined) {
+            const rawThresh = Number(res.confidenceThreshold ?? res.confidence_threshold);
+            setConfidenceThreshold(rawThresh <= 1.0 ? Math.round(rawThresh * 100) : Math.round(rawThresh));
+          }
           if (res.auto_export_csv !== undefined) setAutoExportCSV(Boolean(res.auto_export_csv));
           if (res.log_retention_days) setLogRetention(String(res.log_retention_days));
         }

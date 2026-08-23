@@ -27,7 +27,6 @@ class LotListResponseSchema(BaseModel):
     page: int
     limit: int
     total_pages: int
-# TODO: Check if above aligns with bot or not
 #   lot_id: string;
 #   fish_family: string;
 #   grade: Grade;

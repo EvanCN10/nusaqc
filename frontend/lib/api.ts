@@ -85,6 +85,32 @@ export async function fetchLotDetail(lotId: string): Promise<LotRecord> {
 
 export const fetchLotById = fetchLotDetail;
 
+export async function updateLotNote(lotId: string, note: string): Promise<{ status: string; message: string; inspector_note: string }> {
+  const res = await fetch(`${API_BASE}/api/v1/lots/${lotId}/note`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ note }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Failed to update note" }));
+    throw new Error(err.detail || "Failed to update note");
+  }
+  return res.json();
+}
+
+export async function overrideLotDecision(lotId: string, decision: "PASS" | "FAIL" | "CONDITIONAL", reason: string): Promise<{ status: string; message: string; decision: string; hardware_signal: string }> {
+  const res = await fetch(`${API_BASE}/api/v1/lots/${lotId}/override`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ decision, reason }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Failed to override decision" }));
+    throw new Error(err.detail || "Failed to override decision");
+  }
+  return res.json();
+}
+
 export async function deleteLot(lotId: string): Promise<{ status: string; message: string }> {
   const res = await fetch(`${API_BASE}/api/v1/lots/${lotId}`, {
     method: "DELETE",
