@@ -79,14 +79,6 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-5xl mx-auto w-full">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-black font-sans text-zinc-900 tracking-tight">
-          System & Model Configuration
-        </h1>
-        <p className="text-xs font-sans text-gray-500">
-          Konfigurasi koneksi hardware peripheral, ambang batas inferensi AI, dan manajemen log audit.
-        </p>
-      </div>
 
       {saveMessage && (
         <div

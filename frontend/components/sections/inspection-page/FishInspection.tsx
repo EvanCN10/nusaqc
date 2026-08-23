@@ -7,6 +7,7 @@ import {
   Plus,
   Loader2,
   RefreshCw,
+  RotateCcw,
   AlertCircle,
   CheckCircle2,
   Video,
@@ -29,19 +30,35 @@ export const FISH_FAMILIES = FISH_TYPES;
 
 // Color mapping for defect bounding boxes
 const DEFECT_COLOR_MAP: Record<string, { border: string; bg: string; text: string }> = {
-  sisik_sisa: { border: "border-amber-500", bg: "bg-amber-600", text: "text-white" },
-  warna_abnormal: { border: "border-red-600", bg: "bg-red-600", text: "text-white" },
-  luka_robekan: { border: "border-yellow-500", bg: "bg-yellow-600", text: "text-white" },
-  lendir_berlebih: { border: "border-purple-600", bg: "bg-purple-600", text: "text-white" },
+  parasite: {
+    border: "border-amber-400",
+    bg: "bg-amber-400",
+    text: "text-zinc-900",
+  },
+  discoloration: {
+    border: "border-purple-400",
+    bg: "bg-purple-400",
+    text: "text-white",
+  },
+  lesion: {
+    border: "border-rose-500",
+    bg: "bg-rose-500",
+    text: "text-white",
+  },
+  slime: {
+    border: "border-sky-400",
+    bg: "bg-sky-400",
+    text: "text-zinc-900",
+  },
 };
 
-interface FishInspectionProps {
+type FishInspectionProps = {
   onInspectionStart?: () => void;
   onInspectionComplete?: (result: InspectionResult) => void;
-  onError?: (errorMessage: string) => void;
+  onError?: (error: string) => void;
   lastResult?: InspectionResult | null;
   isLoading?: boolean;
-}
+};
 
 export const FishInspection = ({
   onInspectionStart,
@@ -107,10 +124,6 @@ export const FishInspection = ({
       });
 
       mediaStreamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
       setIsCameraActive(true);
       setFacingMode(mode);
     } catch (err: any) {
@@ -127,6 +140,17 @@ export const FishInspection = ({
       setIsCameraLoading(false);
     }
   };
+
+  // Ensure video stream connects reliably as soon as video element is mounted
+  useEffect(() => {
+    if (isCameraActive && videoRef.current && mediaStreamRef.current) {
+      const video = videoRef.current;
+      video.srcObject = mediaStreamRef.current;
+      video.onloadedmetadata = () => {
+        video.play().catch((err) => console.warn("Video play error:", err));
+      };
+    }
+  }, [isCameraActive]);
 
   const handleToggleFacingMode = () => {
     const nextMode = facingMode === "environment" ? "user" : "environment";
@@ -248,24 +272,34 @@ export const FishInspection = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Camera className="size-5 text-sky-700" />
-          <h2 className="text-xl font-bold font-sans text-zinc-900">Fish Inspection</h2>
+          <h2 className="text-lg font-bold font-sans text-zinc-900">
+            Fish Inspection Viewfinder
+          </h2>
         </div>
-        <div className="flex items-center gap-2">
-          {previewUrl && (
-            <Button
-              variant="outline-sky"
-              onClick={handleReInspect}
-              disabled={isLoading}
-              className="h-[30px] px-2.5 text-xs flex items-center gap-1 cursor-pointer"
-            >
-              <RefreshCw className="size-3" />
-              <span>Ganti Foto / Ulang</span>
-            </Button>
-          )}
-          <span className="text-xs font-mono px-2.5 py-1 bg-sky-50 text-sky-700 rounded-full font-medium border border-sky-200">
-            Dual ONNX Runtime (CPU)
-          </span>
-        </div>
+
+        {/* Action button in Header */}
+        {previewUrl ? (
+          <Button
+            variant="outline-sky"
+            size="sm"
+            onClick={handleReInspect}
+            disabled={isLoading}
+            className="flex items-center gap-1.5 cursor-pointer text-xs"
+          >
+            <RotateCcw className="size-3.5" />
+            <span>Ganti Sampel</span>
+          </Button>
+        ) : isCameraActive ? (
+          <Button
+            variant="outline-sky"
+            size="sm"
+            onClick={stopCameraStream}
+            className="flex items-center gap-1.5 cursor-pointer text-xs text-red-600 border-red-200 hover:bg-red-50"
+          >
+            <X className="size-3.5" />
+            <span>Tutup Kamera</span>
+          </Button>
+        ) : null}
       </div>
 
       {/* Error Alert Banner */}
@@ -282,60 +316,48 @@ export const FishInspection = ({
         {isCameraActive ? (
           <div className="relative w-full h-full flex items-center justify-center bg-black">
             <video
-              ref={videoRef}
+              ref={(el) => {
+                videoRef.current = el;
+                if (el && mediaStreamRef.current && el.srcObject !== mediaStreamRef.current) {
+                  el.srcObject = mediaStreamRef.current;
+                  el.play().catch(() => {});
+                }
+              }}
               autoPlay
               playsInline
               muted
               className="w-full h-full object-cover"
             />
 
-            {/* Viewfinder Overlay Targeting Rect */}
-            <div className="absolute inset-8 border border-white/40 rounded-lg pointer-events-none flex items-center justify-center">
-              <div className="size-12 border-t-2 border-l-2 border-sky-400 absolute top-0 left-0" />
-              <div className="size-12 border-t-2 border-r-2 border-sky-400 absolute top-0 right-0" />
-              <div className="size-12 border-b-2 border-l-2 border-sky-400 absolute bottom-0 left-0" />
-              <div className="size-12 border-b-2 border-r-2 border-sky-400 absolute bottom-0 right-0" />
-              <span className="text-[11px] font-mono text-white/70 bg-black/50 px-2 py-0.5 rounded">
-                Posisikan Ikan di Dalam Kotak
-              </span>
-            </div>
-
-            {/* Top Live Badge & Controls */}
-            <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-auto">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-600/90 text-white rounded-full text-xs font-mono font-bold shadow-md">
-                <Radio className="size-3 animate-pulse text-white" />
-                <span>CAMERA LIVE FEED</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleToggleFacingMode}
-                  className="p-2 bg-black/60 hover:bg-black/80 text-white rounded-full transition-colors cursor-pointer"
-                  title="Ganti Kamera"
-                >
-                  <FlipHorizontal className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={stopCameraStream}
-                  className="p-2 bg-black/60 hover:bg-black/80 text-white rounded-full transition-colors cursor-pointer"
-                  title="Tutup Kamera"
-                >
-                  <X className="size-4" />
-                </button>
-              </div>
+            {/* Top Controls: Flip & Close */}
+            <div className="absolute top-3 right-3 flex items-center gap-2 pointer-events-auto z-10">
+              <button
+                type="button"
+                onClick={handleToggleFacingMode}
+                className="p-2 bg-black/60 hover:bg-black/80 text-white rounded-full transition-colors cursor-pointer"
+                title="Ganti Kamera"
+              >
+                <FlipHorizontal className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={stopCameraStream}
+                className="p-2 bg-black/60 hover:bg-black/80 text-white rounded-full transition-colors cursor-pointer"
+                title="Tutup Kamera"
+              >
+                <X className="size-4" />
+              </button>
             </div>
 
             {/* Bottom Capture Button Bar */}
-            <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-4 pointer-events-auto">
+            <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-4 pointer-events-auto z-10">
               <button
                 type="button"
                 onClick={handleCaptureSnapshot}
                 className="flex items-center gap-2 px-6 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm font-sans rounded-full shadow-lg transition-all active:scale-95 cursor-pointer border-2 border-white"
               >
-                <CircleDot className="size-5 text-white animate-ping opacity-75" />
-                <span>Ambil Foto (Capture)</span>
+                <Camera className="size-4.5 text-white" />
+                <span>Ambil Foto</span>
               </button>
             </div>
           </div>
@@ -399,7 +421,7 @@ export const FishInspection = ({
                   Ambil Snapshot Kamera atau Unggah Sampel
                 </p>
                 <p className="text-xs font-normal font-sans text-gray-500 mt-1">
-                  Pilih metode pengambilan citra ikan untuk proses klasifikasi kesegaran dan deteksi defek.
+                  Pilih metode pengambilan citra ikan untuk proses klasifikasi kesegaran dan deteksi cacat mutu.
                 </p>
               </div>
 

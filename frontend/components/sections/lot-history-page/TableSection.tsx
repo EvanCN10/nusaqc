@@ -129,7 +129,7 @@ export const TableSection = ({
                 Grade (SNI)
               </th>
               <th className="w-36 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
-                Defek Terdeteksi
+                Cacat Terdeteksi
               </th>
               <th className="w-32 px-4 py-3 text-left text-xs font-bold font-sans uppercase tracking-wider text-gray-600">
                 Keputusan
@@ -170,7 +170,7 @@ export const TableSection = ({
             ) : (
               lots.map((lot, index) => {
                 const rowLotId = lot.lotId || lot.lot_id || `LOT-${lot.id}`;
-                const rowFamily = lot.fishFamily || lot.fish_family || lot.family || "Scombridae";
+                const rowFamily = lot.fishFamily || lot.fish_family || lot.family || "Tuna";
                 const rowGrade = lot.grade || "A";
                 const rowDecision = lot.decision || "PASS";
                 const rowDefects = lot.defectsCount ?? lot.defects_count ?? (lot.defects ? lot.defects.length : 0);
@@ -221,7 +221,7 @@ export const TableSection = ({
                             : "bg-emerald-50 text-emerald-700 border-emerald-200"
                         }`}
                       >
-                        {rowDefects} defek
+                        {rowDefects} Cacat
                       </span>
                     </td>
 

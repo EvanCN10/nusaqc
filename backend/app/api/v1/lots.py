@@ -13,6 +13,7 @@ from app.config import settings
 from app.api.deps import get_db
 from app.models.inspection_record import InspectionRecord
 from app.models.storage_slot import StorageSlot
+from app.models.dispatch import DispatchLot
 
 router = APIRouter()
 
@@ -288,7 +289,10 @@ def delete_lot_by_id(
         slot.lot_id = None
         slot.assigned_at = None
 
-    # 2. Try to remove image file if stored locally in uploads
+    # 2. Clean up any dispatch lot links
+    db.query(DispatchLot).filter(DispatchLot.lot_id == lot_id).delete()
+
+    # 3. Try to remove image file if stored locally in uploads
     if record.image_path and record.image_path.startswith("/uploads/"):
         filename = record.image_path.replace("/uploads/", "")
         file_path = os.path.join(settings.UPLOAD_DIR, filename)

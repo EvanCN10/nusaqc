@@ -94,7 +94,7 @@ export const ResultSection = ({ result, isLoading = false }: ResultSectionProps)
           <Sparkles className="size-7 animate-spin" />
         </div>
         <p className="text-sm font-bold font-sans text-sky-800">Sedang Menganalisis Citra Ikan...</p>
-        <p className="text-xs font-mono text-gray-400">Menghitung matriks kesegaran & lokalisasi defek</p>
+        <p className="text-xs font-mono text-gray-400">Menghitung matriks kesegaran & lokalisasi cacat visual</p>
       </div>
     );
   }
@@ -187,7 +187,7 @@ export const ResultSection = ({ result, isLoading = false }: ResultSectionProps)
             Defect Detection (Model 2 YOLOv8s)
           </h3>
           <span className="text-xs font-mono font-semibold px-2 py-0.5 bg-slate-100 rounded-sm text-gray-700">
-            {result.defects?.length || 0} Defek
+            {result.defects?.length || 0} Cacat Terdeteksi
           </span>
         </div>
 

@@ -99,16 +99,6 @@ export default function DispatchPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
-      {/* Page Title & Subtitle */}
-      <div className="flex flex-col">
-        <h1 className="text-2xl font-black font-sans text-zinc-900 tracking-tight">
-          Export Dispatch & Logistics Management
-        </h1>
-        <p className="text-xs font-sans text-gray-500 mt-0.5">
-          Manajemen rantai pasok ekspor produk perikanan (Pending ➔ In Transit ➔ Delivered).
-        </p>
-      </div>
-
       {/* Top 4 Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Total Dispatches */}

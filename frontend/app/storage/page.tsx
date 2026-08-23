@@ -136,16 +136,6 @@ export default function StoragePage() {
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
-      {/* Page Title & Subtitle */}
-      <div className="flex flex-col">
-        <h1 className="text-2xl font-black font-sans text-zinc-900 tracking-tight">
-          Cold & Frozen Storage Map
-        </h1>
-        <p className="text-xs font-sans text-gray-500 mt-0.5">
-          Peta penempatan slot penyimpanan ikan pasca-inspeksi mutu (Cold & Frozen Storage).
-        </p>
-      </div>
-
       {/* Notification Toast */}
       {notification && (
         <div
@@ -164,62 +154,64 @@ export default function StoragePage() {
         </div>
       )}
 
-      {/* Top Stat Summary Bar */}
-      <div className="w-full bg-white rounded-lg shadow-xs outline outline-1 outline-slate-300 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 text-sm font-sans">
-        <div className="flex items-center gap-6 divide-x divide-slate-200">
-          <div>
-            <span className="text-gray-500 text-xs block">Total Slots</span>
-            <span className="font-bold text-zinc-900 text-base">{totalSlots}</span>
-          </div>
-          <div className="pl-6">
-            <span className="text-gray-500 text-xs block">Occupied</span>
-            <span className="font-bold text-sky-600 text-base">{totalOccupied}</span>
-          </div>
-          <div className="pl-6">
-            <span className="text-gray-500 text-xs block">Available</span>
-            <span className="font-bold text-emerald-600 text-base">{totalAvailable}</span>
-          </div>
-          <div className="pl-6">
-            <span className="text-gray-500 text-xs block">Pending Assignment</span>
-            <span className="font-bold text-amber-600 text-base">{pendingCount}</span>
-          </div>
+      {/* Top Stat KPI Metric Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 w-full">
+        <div className="p-4 bg-white rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between">
+          <span className="text-xs font-semibold text-slate-500 font-sans">Total Slots</span>
+          <span className="text-2xl font-black text-slate-900 font-sans mt-1">{totalSlots}</span>
         </div>
+        <div className="p-4 bg-white rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between">
+          <span className="text-xs font-semibold text-slate-500 font-sans">Occupied</span>
+          <span className="text-2xl font-black text-sky-600 font-sans mt-1">{totalOccupied}</span>
+        </div>
+        <div className="p-4 bg-white rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between">
+          <span className="text-xs font-semibold text-slate-500 font-sans">Available</span>
+          <span className="text-2xl font-black text-emerald-600 font-sans mt-1">{totalAvailable}</span>
+        </div>
+        <div className="p-4 bg-white rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between">
+          <span className="text-xs font-semibold text-slate-500 font-sans">Pending Assignment</span>
+          <span className="text-2xl font-black text-amber-600 font-sans mt-1">{pendingCount}</span>
+        </div>
+      </div>
 
-        {/* Zone Filter Buttons */}
+      {/* Zone Filter Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 px-4 rounded-lg border border-slate-200 shadow-xs">
+        <span className="text-xs font-bold text-slate-700 font-sans">
+          Filter Tampilan Zona:
+        </span>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-gray-500 mr-1">Show zone:</span>
           <button
             type="button"
             onClick={() => setSelectedZone("all")}
-            className={`px-3 py-1 text-xs font-bold font-sans rounded-full transition-colors cursor-pointer ${
+            className={`px-3 py-1 text-xs font-bold font-sans rounded-sm transition-colors cursor-pointer ${
               selectedZone === "all"
-                ? "bg-sky-600 text-white"
-                : "bg-slate-100 text-gray-600 hover:bg-slate-200"
+                ? "bg-sky-600 text-white shadow-xs"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
-            All Zones ✓
+            Semua Zona
           </button>
           <button
             type="button"
             onClick={() => setSelectedZone("cold")}
-            className={`px-3 py-1 text-xs font-bold font-sans rounded-full transition-colors cursor-pointer ${
+            className={`px-3 py-1 text-xs font-bold font-sans rounded-sm transition-colors cursor-pointer ${
               selectedZone === "cold"
-                ? "bg-sky-600 text-white"
-                : "bg-slate-100 text-gray-600 hover:bg-slate-200"
+                ? "bg-sky-600 text-white shadow-xs"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
-            Cold Zone
+            Cold Zone (0–4°C)
           </button>
           <button
             type="button"
             onClick={() => setSelectedZone("frozen")}
-            className={`px-3 py-1 text-xs font-bold font-sans rounded-full transition-colors cursor-pointer ${
+            className={`px-3 py-1 text-xs font-bold font-sans rounded-sm transition-colors cursor-pointer ${
               selectedZone === "frozen"
-                ? "bg-sky-600 text-white"
-                : "bg-slate-100 text-gray-600 hover:bg-slate-200"
+                ? "bg-indigo-600 text-white shadow-xs"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
-            Frozen Zone
+            Frozen Zone (≤ -18°C)
           </button>
         </div>
       </div>
@@ -230,7 +222,7 @@ export default function StoragePage() {
           <div className="flex items-center gap-2 text-sm font-sans font-medium">
             <Info className="size-5 shrink-0" />
             <span>
-              Placing: <strong className="font-mono">{placingLot.lotId || placingLot.lot_id}</strong> ({placingLot.fishFamily || placingLot.fish_family || "Scombridae"}, Grade {placingLot.grade || "A"}) — Klik slot hijau yang kosong untuk menempatkan lot.
+              Placing: <strong className="font-mono">{placingLot.lotId || placingLot.lot_id}</strong> ({placingLot.fishFamily || placingLot.fish_family || "Tuna"}, Grade {placingLot.grade || "A"}) — Klik slot hijau yang kosong untuk menempatkan lot.
             </span>
           </div>
           <button
@@ -247,14 +239,6 @@ export default function StoragePage() {
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT COLUMN: Storage Map Grids (col-span-8) */}
         <div className="lg:col-span-8 flex flex-col gap-6">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-xl font-black font-sans text-zinc-900 tracking-tight">
-              Lot Storage Map
-            </h2>
-            <p className="text-xs font-sans text-gray-500">
-              Assign inspected lots to cold storage slots
-            </p>
-          </div>
 
           {/* 1. Cold Zone Card */}
           {(selectedZone === "all" || selectedZone === "cold") && (

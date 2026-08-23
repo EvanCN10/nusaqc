@@ -330,7 +330,7 @@ export const ResultDetail = ({ lotId }: ResultDetailProps) => {
               Defect Detection (Model 2 YOLOv8s)
             </h3>
             <span className="text-xs font-mono font-semibold px-2 py-0.5 bg-slate-100 rounded-sm text-gray-700">
-              {defectsList.length} Defek
+              {defectsList.length} Cacat Terdeteksi
             </span>
           </div>
 

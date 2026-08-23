@@ -83,22 +83,15 @@ def get_dispatches(db: Session = Depends(get_db)):
 @router.get(
     "/available-lots",
     summary="Get Lots Available for Dispatch",
-    description="Returns lots stored in slots that have not yet been assigned to any dispatch."
+    description="Returns lots currently stored in slots that have not yet been assigned to any dispatch."
 )
 def get_available_lots_for_dispatch(db: Session = Depends(get_db)):
-    # Lots that are passed, assigned to storage slot, and not yet in a dispatch
+    # Lots that are passed, actively assigned to a storage slot, and not yet dispatched
     records = db.query(InspectionRecord).filter(
         InspectionRecord.decision == "PASS",
         InspectionRecord.storage_slot != None,
         InspectionRecord.dispatch_id == None
-    ).order_by(desc(InspectionRecord.timestamp)).all()
-
-    # If no stored lots exist, also include recent PASS lots for flexible demo experience
-    if len(records) == 0:
-        records = db.query(InspectionRecord).filter(
-            InspectionRecord.decision == "PASS",
-            InspectionRecord.dispatch_id == None
-        ).order_by(desc(InspectionRecord.timestamp)).limit(10).all()
+    ).order_by(desc(InspectionRecord.stored_at)).all()
 
     return [
         {
@@ -115,8 +108,9 @@ def get_available_lots_for_dispatch(db: Session = Depends(get_db)):
             "defectsCount": r.defects_count,
             "decision": r.decision,
             "hardware_signal": r.hardware_signal,
-            "storage_slot": r.storage_slot or "C01",
-            "storageSlot": r.storage_slot or "C01",
+            "storage_slot": r.storage_slot,
+            "storageSlot": r.storage_slot,
+            "storage_zone": r.storage_zone,
             "stored_at": r.stored_at.strftime("%Y-%m-%d %H:%M") if r.stored_at else r.timestamp.strftime("%Y-%m-%d %H:%M"),
         }
         for r in records
@@ -273,6 +267,10 @@ def update_dispatch_status(
             if slot:
                 slot.lot_id = None
                 slot.assigned_at = None
+            rec = db.query(InspectionRecord).filter(InspectionRecord.lot_id == link.lot_id).first()
+            if rec:
+                rec.storage_slot = None
+                rec.storage_zone = None
 
     db.commit()
 

@@ -64,16 +64,6 @@ export const SearchHistory = ({
 
   return (
     <div className="w-full flex flex-col gap-4">
-      {/* Page Title & Subtitle */}
-      <div className="w-full flex flex-col">
-        <h1 className="text-2xl font-black font-sans text-zinc-900 tracking-tight">
-          Inspection History & Quality Audit Logs
-        </h1>
-        <p className="text-xs font-sans text-gray-500 mt-0.5">
-          Seluruh rekaman log hasil inferensi AI, skor mutu organoleptik SNI 2729:2013, jenis ikan, dan lokalisasi defek.
-        </p>
-      </div>
-
       {/* Search & Filter Card */}
       <div className="w-full bg-white rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-slate-300 p-5 flex flex-col gap-4">
         {/* Row 1: Search Input & Dropdowns */}

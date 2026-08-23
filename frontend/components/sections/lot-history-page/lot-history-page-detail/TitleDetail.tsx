@@ -81,7 +81,7 @@ export const TitleDetail = ({ lotId }: TitleDetailProps) => {
             </div>
 
             <p className="text-xs font-sans text-gray-600 leading-relaxed">
-              Tindakan ini akan menghapus data audit inspeksi mutu, rekaman defek visual, dan mengosongkan alokasi slot penyimpanan terkait secara permanen.
+              Tindakan ini akan menghapus data audit inspeksi mutu, rekaman cacat mutu visual, dan mengosongkan alokasi slot penyimpanan terkait secara permanen.
             </p>
 
             {errorMsg && (

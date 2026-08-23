@@ -147,7 +147,7 @@ export const AIModel = ({
       <div className="pt-4 border-t border-slate-200 flex flex-col gap-3">
         <div>
           <span className="text-sm font-bold font-sans text-zinc-900 block">
-            Taksonomi 4 Kelas Defek Permukaan (YOLOv8s)
+            Taksonomi 4 Kelas Cacat Permukaan (YOLOv8s Defects)
           </span>
           <span className="text-xs text-gray-500 font-sans">
             Seluruh kelas telah diselaraskan dengan dataset hasil training di models/model_2.

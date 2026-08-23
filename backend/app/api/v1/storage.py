@@ -17,23 +17,33 @@ class AssignSlotRequest(BaseModel):
 
 def init_default_storage_slots(db: Session):
     """Seed 35 default storage slots (25 Cold Zone, 10 Frozen Zone) if not already created."""
-    if db.query(StorageSlot).count() > 0:
-        return
+    if db.query(StorageSlot).count() == 0:
+        slots = []
+        # 1. Cold Zone (5 rows x 5 cols = 25 slots)
+        for row in ["A", "B", "C", "D", "E"]:
+            for col in range(1, 6):
+                slot_id = f"{row}{col:02d}"
+                slots.append(StorageSlot(slot_id=slot_id, zone="cold", lot_id=None))
 
-    slots = []
-    # 1. Cold Zone (5 rows x 5 cols = 25 slots)
-    for row in ["A", "B", "C", "D", "E"]:
-        for col in range(1, 6):
-            slot_id = f"{row}{col:02d}"
-            slots.append(StorageSlot(slot_id=slot_id, zone="cold", lot_id=None))
+        # 2. Frozen Zone (10 slots F-01 to F-10)
+        for col in range(1, 11):
+            slot_id = f"F-{col:02d}"
+            slots.append(StorageSlot(slot_id=slot_id, zone="frozen", lot_id=None))
 
-    # 2. Frozen Zone (10 slots F-01 to F-10)
-    for col in range(1, 11):
-        slot_id = f"F-{col:02d}"
-        slots.append(StorageSlot(slot_id=slot_id, zone="frozen", lot_id=None))
+        db.add_all(slots)
+        db.commit()
 
-    db.add_all(slots)
-    db.commit()
+        # Re-sync any lots that have storage_slot set in inspections table
+        stored_records = db.query(InspectionRecord).filter(
+            InspectionRecord.storage_slot != None,
+            InspectionRecord.dispatch_id == None
+        ).all()
+        for rec in stored_records:
+            slot = db.query(StorageSlot).filter(StorageSlot.slot_id == rec.storage_slot).first()
+            if slot:
+                slot.lot_id = rec.lot_id
+                slot.assigned_at = rec.stored_at or datetime.utcnow()
+        db.commit()
 
 @router.get(
     "/slots",
@@ -48,10 +58,11 @@ def get_storage_slots(db: Session = Depends(get_db)):
     total_slots = len(slots)
     available_count = total_slots - occupied_count
 
-    # Pending assignment count (PASS lots not yet stored in a slot)
+    # Pending assignment count (PASS lots not yet stored in a slot and not dispatched)
     pending_count = db.query(InspectionRecord).filter(
         InspectionRecord.decision == "PASS",
-        InspectionRecord.storage_slot == None
+        InspectionRecord.storage_slot == None,
+        InspectionRecord.dispatch_id == None
     ).count()
 
     # Map lot details to occupied slots
@@ -107,12 +118,13 @@ def get_storage_slots(db: Session = Depends(get_db)):
 @router.get(
     "/pending",
     summary="Get Lots Pending Storage Assignment",
-    description="Returns lots with decision PASS that are not yet assigned to any storage slot."
+    description="Returns lots with decision PASS that are not yet assigned to any storage slot and not dispatched."
 )
 def get_pending_storage_lots(db: Session = Depends(get_db)):
     pending_records = db.query(InspectionRecord).filter(
         InspectionRecord.decision == "PASS",
-        InspectionRecord.storage_slot == None
+        InspectionRecord.storage_slot == None,
+        InspectionRecord.dispatch_id == None
     ).order_by(desc(InspectionRecord.timestamp)).all()
 
     return [
