@@ -12,7 +12,7 @@ if hasattr(sys.stdout, 'reconfigure'):
         pass
 
 from app.config import settings
-from app.core.database import Base, engine
+from app.core.database import init_db
 import app.models
 from app.core.websocket import ws_manager
 from app.api.v1.router import api_v1_router
@@ -21,7 +21,7 @@ from app.api.v1.router import api_v1_router
 async def lifespan(app: FastAPI):
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     os.makedirs(settings.MODEL_DIR, exist_ok=True)
-    Base.metadata.create_all(bind=engine)
+    init_db()
     print(f"🚀 {settings.APP_NAME} initialized successfully!")
     print(f"📁 SQLite Database: {settings.DATABASE_URL}")
     print(f"⚙️ Mock Hardware Mode: {settings.ENABLE_MOCK_HARDWARE}")
