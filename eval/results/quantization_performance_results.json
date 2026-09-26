@@ -1,0 +1,33 @@
+{
+  "suite_name": "test_quantization_performance",
+  "timestamp": "2026-09-26T04:30:31Z",
+  "model_footprint": {
+    "fp32_size_mb": 42.68,
+    "int8_size_mb": null,
+    "size_reduction_pct": null,
+    "int8_status": "PENDING_PHASE_2"
+  },
+  "latency_and_throughput": {
+    "host_cpu": {
+      "fp32_latency_ms": 226.83,
+      "fp32_fps": 4.41,
+      "int8_latency_ms": null,
+      "int8_fps": null,
+      "speedup_factor": null
+    },
+    "edge_rpi4_reference": {
+      "fp32_latency_ms": 1315.0,
+      "fp32_fps": 0.76,
+      "int8_latency_ms": null,
+      "int8_fps": null,
+      "speedup_target": 3.46
+    }
+  },
+  "baseline_bottleneck_finding": {
+    "fp32_size_mb": 42.68,
+    "fp32_host_cpu_latency_ms": 226.83,
+    "fp32_edge_latency_projection_ms": 1315.0,
+    "fp32_edge_fps_projection": 0.76,
+    "recommendation_phase_2": "Wajib Kuantisasi Dinamis INT8 pada Fase II untuk mengejar target >2.5 FPS pada Edge RPi 4"
+  }
+}
