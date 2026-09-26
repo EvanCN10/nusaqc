@@ -1,9 +1,11 @@
 import base64
+import io
 import json
 import logging
 import re
 from typing import Dict, Any, List, Optional
 import httpx
+from PIL import Image
 
 from app.config import settings
 
@@ -48,10 +50,21 @@ class AgenticAdjudicationService:
                 "adjudicated_by": "agent_fallback",
             }
 
-        # 1. Base64 encode snapshot
-        base64_image = base64.b64encode(image_bytes).decode("utf-8")
+        # 1. Normalize image to standardized RGB JPEG bytes
+        # Supports PNG, JPG, WEBP, GIF, BMP, etc., and strips alpha channels
+        try:
+            pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+            buf = io.BytesIO()
+            pil_image.save(buf, format="JPEG", quality=90)
+            normalized_bytes = buf.getvalue()
+        except Exception as norm_err:
+            logger.warning(f"[Agentic Adjudication] Image normalization failed ({norm_err}), using raw bytes.")
+            normalized_bytes = image_bytes
 
-        # 2. Format defect summary
+        # 2. Base64 encode snapshot
+        base64_image = base64.b64encode(normalized_bytes).decode("utf-8")
+
+        # 3. Format defect summary
         if defects_json:
             defects_summary = ", ".join(
                 [f"{d.get('label', 'defect')} ({round(d.get('confidence', 0.0) * 100)}%)" for d in defects_json]
@@ -61,7 +74,7 @@ class AgenticAdjudicationService:
 
         conf_pct = round(grade_confidence * 100, 1) if grade_confidence <= 1.0 else round(grade_confidence, 1)
 
-        # 3. Construct SNI 01-2729 Domain-Specific Prompt
+        # 4. Construct SNI 01-2729 Domain-Specific Prompt
         prompt = f"""Anda adalah Senior Quality Control Inspector bersertifikat SNI 01-2729 (Standar Mutu Ikan Segar Ekspor) di NusaQC.
 Tugas Anda adalah melakukan Agentic Adjudication (evaluasi cerdas tahap kedua) untuk lot ikan yang hasil deteksi awalnya berstatus "CONDITIONAL" (borderline).
 
@@ -85,7 +98,7 @@ Keluarkan respon HANYA dalam format JSON valid tanpa teks atau markdown tambahan
   "reasoning": "Penalaran organoleptik berdasarkan foto..."
 }}"""
 
-        # 4. Invoke AWS Bedrock API
+        # 5. Invoke AWS Bedrock API
         models_to_try = [model_id]
         if model_id != "amazon.nova-lite-v1:0":
             models_to_try.append("amazon.nova-lite-v1:0")
@@ -138,6 +151,8 @@ Keluarkan respon HANYA dalam format JSON valid tanpa teks atau markdown tambahan
                             "agent_reasoning": reasoning,
                             "adjudicated_by": "agent",
                         }
+                    else:
+                        logger.warning(f"[Agentic Adjudication] Failed to parse JSON from {current_model}: {raw_text}")
                 else:
                     logger.warning(f"[Agentic Adjudication] {current_model} returned {response.status_code}: {response.text}")
             except Exception as e:
@@ -170,7 +185,7 @@ Keluarkan respon HANYA dalam format JSON valid tanpa teks atau markdown tambahan
             return json.loads(text_clean)
         except Exception:
             # Fallback regex search for json object
-            match = re.search(r"\{.*?\"decision\".*?\}", text_clean, re.DOTALL)
+            match = re.search(r'\{.*?"decision".*?\}', text_clean, re.DOTALL)
             if match:
                 try:
                     return json.loads(match.group(0))
