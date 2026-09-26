@@ -25,6 +25,8 @@ import {
 } from "@/lib/api";
 import { StorageOverview, StorageSlot, LotRecord } from "@/types";
 import { SlotDetailDrawer } from "@/components/sections/storage-page/SlotDetailDrawer";
+import { useAuth } from "@/lib/auth";
+import { Switch } from "@/components/ui/Switch";
 
 export default function StoragePage() {
   const [overview, setOverview] = useState<StorageOverview | null>(null);
@@ -32,6 +34,9 @@ export default function StoragePage() {
   const [selectedZone, setSelectedZone] = useState<"all" | "cold" | "frozen">("all");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAutoAssigning, setIsAutoAssigning] = useState<boolean>(false);
+  const { user } = useAuth();
+  const [isAutoAssignEnabled, setIsAutoAssignEnabled] = useState<boolean>(true);
+  const canToggleAutoAssign = user?.role === "supervisor" || user?.role === "admin";
 
   // Interactive Placing Mode State
   const [placingLot, setPlacingLot] = useState<LotRecord | null>(null);
@@ -263,25 +268,58 @@ export default function StoragePage() {
           </div>
         </div>
 
-        {/* Smart Auto-Assign All Button */}
-        <button
-          type="button"
-          onClick={handleAutoAssignAll}
-          disabled={isAutoAssigning || pendingCount === 0}
-          className="px-3.5 py-1.5 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white rounded-sm text-xs font-bold font-sans transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
-        >
-          {isAutoAssigning ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <Sparkles className="size-3.5 text-amber-300" />
-          )}
-          <span>Smart Auto-Assign All</span>
-          {pendingCount > 0 && (
-            <span className="px-1.5 py-0.2 bg-white/20 text-white text-[10px] rounded-full font-mono font-bold">
-              {pendingCount}
-            </span>
-          )}
-        </button>
+        {/* Smart Auto-Assign Toggle & Action Button */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-sm">
+            <Switch
+              id="smart-auto-assign-toggle"
+              checked={isAutoAssignEnabled}
+              onCheckedChange={canToggleAutoAssign ? setIsAutoAssignEnabled : () => {}}
+              disabled={!canToggleAutoAssign}
+            />
+            <label
+              htmlFor="smart-auto-assign-toggle"
+              className={`text-xs font-semibold select-none flex items-center gap-1.5 ${
+                canToggleAutoAssign ? "cursor-pointer text-slate-700" : "cursor-not-allowed text-slate-400"
+              }`}
+              title={canToggleAutoAssign ? "Nyalakan / Matikan AI Smart Auto-Assign" : "Hanya QC Supervisor atau Admin yang berhak mengubah"}
+            >
+              <span>Auto-Assign</span>
+              <span
+                className={`px-1.5 py-0.2 text-[10px] font-bold rounded ${
+                  isAutoAssignEnabled
+                    ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
+                    : "bg-slate-200 text-slate-600 border border-slate-300"
+                }`}
+              >
+                {isAutoAssignEnabled ? "ON" : "OFF"}
+              </span>
+              {!canToggleAutoAssign && (
+                <span className="text-[10px] text-amber-600 font-normal ml-0.5">(Khusus Spv/Admin)</span>
+              )}
+            </label>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleAutoAssignAll}
+            disabled={isAutoAssigning || pendingCount === 0 || !isAutoAssignEnabled}
+            title={!isAutoAssignEnabled ? "Fitur Smart Auto-Assign sedang dinonaktifkan oleh Supervisor" : undefined}
+            className="px-3.5 py-1.5 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white rounded-sm text-xs font-bold font-sans transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+          >
+            {isAutoAssigning ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="size-3.5 text-amber-300" />
+            )}
+            <span>Smart Auto-Assign All</span>
+            {pendingCount > 0 && (
+              <span className="px-1.5 py-0.2 bg-white/20 text-white text-[10px] rounded-full font-mono font-bold">
+                {pendingCount}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Interactive Placing Alert Banner */}
@@ -523,7 +561,8 @@ export default function StoragePage() {
                       <button
                         type="button"
                         onClick={() => handleAutoAssignOne(lid)}
-                        disabled={isAutoAssigning}
+                        disabled={isAutoAssigning || !isAutoAssignEnabled}
+                        title={!isAutoAssignEnabled ? "Auto-Assign dinonaktifkan" : undefined}
                         className="w-full py-1.5 px-2 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white rounded-sm text-xs font-bold font-sans transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
                       >
                         <Zap className="size-3 text-amber-300 fill-amber-300" />

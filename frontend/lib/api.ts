@@ -288,3 +288,21 @@ export async function updateDispatchStatus(dispatchId: string, status: "pending"
   if (!res.ok) throw new Error(`Failed to update dispatch status to ${status}`);
   return res.json();
 }
+// ----------------------------------------------------
+// JURY QUICK-TEST API
+// ----------------------------------------------------
+
+export interface JurySample {
+  id: string;
+  label: string;
+  badge: "PASS" | "FAIL" | "CONDITIONAL";
+  fish_type: string;
+  description: string;
+  filename: string;
+}
+
+export async function fetchJurySamples(): Promise<JurySample[]> {
+  const res = await fetch(`${API_BASE}/api/v1/jury/samples`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch jury samples");
+  return res.json();
+}

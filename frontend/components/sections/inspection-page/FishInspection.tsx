@@ -15,9 +15,11 @@ import {
   FlipHorizontal,
   CircleDot,
   Radio,
+  Sparkles,
+  FlaskConical,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { runInspection } from "@/lib/api";
+import { runInspection, API_BASE } from "@/lib/api";
 import { InspectionResult } from "@/types";
 
 export const FISH_TYPES = [
@@ -72,6 +74,7 @@ export const FishInspection = ({
   const [selectedFishType, setSelectedFishType] = useState<string>("Tuna");
   const [imageDimensions, setImageDimensions] = useState<{ naturalWidth: number; naturalHeight: number } | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [loadingPreset, setLoadingPreset] = useState<string | null>(null);
 
   // Camera stream state
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
@@ -224,6 +227,31 @@ export const FishInspection = ({
     });
   };
 
+  const handleLoadPreset = async (sampleId: string, fishType: string) => {
+    setLoadingPreset(sampleId);
+    setLocalError(null);
+    stopCameraStream();
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/jury/sample/${sampleId}`);
+      if (!res.ok) {
+        throw new Error(`Gagal memuat preset sampel (Status: ${res.status})`);
+      }
+      const blob = await res.blob();
+      const filename = `jury_${sampleId}.jpg`;
+      const file = new File([blob], filename, { type: "image/jpeg" });
+      const objectUrl = URL.createObjectURL(blob);
+
+      setSelectedFile(file);
+      setPreviewUrl(objectUrl);
+      setSelectedFishType(fishType);
+    } catch (err: any) {
+      setLocalError(err.message || "Gagal memuat sampel uji juri.");
+    } finally {
+      setLoadingPreset(null);
+    }
+  };
+
   const handleReInspect = () => {
     stopCameraStream();
     setPreviewUrl(null);
@@ -309,6 +337,80 @@ export const FishInspection = ({
           <span>{localError}</span>
         </div>
       )}
+
+      {/* JURY QUICK-TEST PRESET BAR */}
+      <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-3 flex flex-col gap-2 shadow-xs">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <FlaskConical className="size-4 text-sky-600 animate-pulse" />
+            <span className="text-xs font-bold font-sans text-slate-800 tracking-wide uppercase">
+              Jury Quick-Test Presets (Simulasi Demo Cepat)
+            </span>
+          </div>
+          <span className="text-[10px] font-medium text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-full">
+            1-Klik Muat Data Terkalibrasi
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+          {/* Preset 1: Grade A */}
+          <button
+            type="button"
+            disabled={isLoading || loadingPreset !== null}
+            onClick={() => handleLoadPreset("grade_a", "Tuna")}
+            className="flex items-center gap-2 p-2 rounded-md bg-white border border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all text-left group cursor-pointer shadow-xs disabled:opacity-50"
+          >
+            <div className="size-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-xs">
+              {loadingPreset === "grade_a" ? <Loader2 className="size-3.5 animate-spin" /> : "A"}
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-bold text-emerald-800 truncate">Grade A (Segar)</span>
+                <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-1 rounded">PASS</span>
+              </div>
+              <p className="text-[10px] text-slate-500 truncate">Tuna Ekspor (Sinyal Hijau)</p>
+            </div>
+          </button>
+
+          {/* Preset 2: Conditional AWS Bedrock */}
+          <button
+            type="button"
+            disabled={isLoading || loadingPreset !== null}
+            onClick={() => handleLoadPreset("conditional", "Mackarel")}
+            className="flex items-center gap-2 p-2 rounded-md bg-white border-2 border-amber-400 hover:border-amber-500 hover:bg-amber-50/50 transition-all text-left group cursor-pointer shadow-xs ring-2 ring-amber-100 disabled:opacity-50"
+          >
+            <div className="size-7 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 font-bold text-xs">
+              {loadingPreset === "conditional" ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5 text-amber-600" />}
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-bold text-amber-900 truncate">AWS Bedrock Demo</span>
+                <span className="text-[9px] font-bold bg-amber-100 text-amber-800 px-1 rounded">COND</span>
+              </div>
+              <p className="text-[10px] text-amber-700 font-medium truncate">Memicu Agentic AI Vision</p>
+            </div>
+          </button>
+
+          {/* Preset 3: Grade C */}
+          <button
+            type="button"
+            disabled={isLoading || loadingPreset !== null}
+            onClick={() => handleLoadPreset("grade_c", "Nila")}
+            className="flex items-center gap-2 p-2 rounded-md bg-white border border-rose-300 hover:border-rose-500 hover:bg-rose-50/50 transition-all text-left group cursor-pointer shadow-xs disabled:opacity-50"
+          >
+            <div className="size-7 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center shrink-0 font-bold text-xs">
+              {loadingPreset === "grade_c" ? <Loader2 className="size-3.5 animate-spin" /> : "C"}
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-bold text-rose-800 truncate">Grade C (Reject)</span>
+                <span className="text-[9px] font-bold bg-rose-100 text-rose-800 px-1 rounded">FAIL</span>
+              </div>
+              <p className="text-[10px] text-slate-500 truncate">Nila Rusak (Sinyal Merah)</p>
+            </div>
+          </button>
+        </div>
+      </div>
 
       {/* Main View Area: Image Preview OR Camera Live Feed OR Initial Action State */}
       <div className="relative w-full h-[360px] bg-slate-900 rounded-md outline outline-1 outline-slate-300 overflow-hidden flex items-center justify-center">
