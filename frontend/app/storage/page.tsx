@@ -12,12 +12,16 @@ import {
   CheckCircle2,
   AlertCircle,
   ExternalLink,
+  Sparkles,
+  Zap,
 } from "lucide-react";
 import {
   fetchStorageSlots,
   fetchPendingStorageLots,
   assignStorageSlot,
   clearStorageSlot,
+  autoAssignStorageLot,
+  autoAssignAllStorageLots,
 } from "@/lib/api";
 import { StorageOverview, StorageSlot, LotRecord } from "@/types";
 import { SlotDetailDrawer } from "@/components/sections/storage-page/SlotDetailDrawer";
@@ -27,6 +31,7 @@ export default function StoragePage() {
   const [pendingLots, setPendingLots] = useState<LotRecord[]>([]);
   const [selectedZone, setSelectedZone] = useState<"all" | "cold" | "frozen">("all");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isAutoAssigning, setIsAutoAssigning] = useState<boolean>(false);
 
   // Interactive Placing Mode State
   const [placingLot, setPlacingLot] = useState<LotRecord | null>(null);
@@ -37,6 +42,47 @@ export default function StoragePage() {
   // Selected Slot for Drawer View
   const [activeSlot, setActiveSlot] = useState<StorageSlot | null>(null);
   const [isClearing, setIsClearing] = useState<boolean>(false);
+
+  const handleAutoAssignAll = async () => {
+    if (pendingLots.length === 0) return;
+    setIsAutoAssigning(true);
+    try {
+      const res = await autoAssignAllStorageLots();
+      setNotification({
+        type: "success",
+        text: `✨ Berhasil mengalokasikan ${res.assigned_count} lot secara cerdas ke Cold & Frozen zone!`,
+      });
+      await loadData();
+    } catch (err: any) {
+      setNotification({
+        type: "error",
+        text: err?.message || "Gagal melakukan smart auto-assign massal.",
+      });
+    } finally {
+      setIsAutoAssigning(false);
+      setTimeout(() => setNotification(null), 5000);
+    }
+  };
+
+  const handleAutoAssignOne = async (lotId: string) => {
+    setIsAutoAssigning(true);
+    try {
+      const res = await autoAssignStorageLot(lotId);
+      setNotification({
+        type: "success",
+        text: `⚡ Lot ${lotId} ditempatkan ke Slot ${res.slot_id} (${res.zone.toUpperCase()} Zone). ${res.recommendation_reason || ""}`,
+      });
+      await loadData();
+    } catch (err: any) {
+      setNotification({
+        type: "error",
+        text: err?.message || "Gagal auto-assign lot.",
+      });
+    } finally {
+      setIsAutoAssigning(false);
+      setTimeout(() => setNotification(null), 5000);
+    }
+  };
 
   const loadData = useCallback(async () => {
     try {
@@ -174,46 +220,68 @@ export default function StoragePage() {
         </div>
       </div>
 
-      {/* Zone Filter Toolbar */}
+      {/* Zone Filter Toolbar & Smart Auto-Assign Action */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 px-4 rounded-lg border border-slate-200 shadow-xs">
-        <span className="text-xs font-bold text-slate-700 font-sans">
-          Filter Tampilan Zona:
-        </span>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setSelectedZone("all")}
-            className={`px-3 py-1 text-xs font-bold font-sans rounded-sm transition-colors cursor-pointer ${
-              selectedZone === "all"
-                ? "bg-sky-600 text-white shadow-xs"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
-          >
-            Semua Zona
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedZone("cold")}
-            className={`px-3 py-1 text-xs font-bold font-sans rounded-sm transition-colors cursor-pointer ${
-              selectedZone === "cold"
-                ? "bg-sky-600 text-white shadow-xs"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
-          >
-            Cold Zone (0–4°C)
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedZone("frozen")}
-            className={`px-3 py-1 text-xs font-bold font-sans rounded-sm transition-colors cursor-pointer ${
-              selectedZone === "frozen"
-                ? "bg-indigo-600 text-white shadow-xs"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
-          >
-            Frozen Zone (≤ -18°C)
-          </button>
+          <span className="text-xs font-bold text-slate-700 font-sans">
+            Filter Tampilan Zona:
+          </span>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setSelectedZone("all")}
+              className={`px-3 py-1 text-xs font-bold font-sans rounded-sm transition-colors cursor-pointer ${
+                selectedZone === "all"
+                  ? "bg-sky-600 text-white shadow-xs"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              Semua Zona
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedZone("cold")}
+              className={`px-3 py-1 text-xs font-bold font-sans rounded-sm transition-colors cursor-pointer ${
+                selectedZone === "cold"
+                  ? "bg-sky-600 text-white shadow-xs"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              Cold Zone (0–4°C)
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedZone("frozen")}
+              className={`px-3 py-1 text-xs font-bold font-sans rounded-sm transition-colors cursor-pointer ${
+                selectedZone === "frozen"
+                  ? "bg-indigo-600 text-white shadow-xs"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              Frozen Zone (≤ -18°C)
+            </button>
+          </div>
         </div>
+
+        {/* Smart Auto-Assign All Button */}
+        <button
+          type="button"
+          onClick={handleAutoAssignAll}
+          disabled={isAutoAssigning || pendingCount === 0}
+          className="px-3.5 py-1.5 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white rounded-sm text-xs font-bold font-sans transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+        >
+          {isAutoAssigning ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="size-3.5 text-amber-300" />
+          )}
+          <span>Smart Auto-Assign All</span>
+          {pendingCount > 0 && (
+            <span className="px-1.5 py-0.2 bg-white/20 text-white text-[10px] rounded-full font-mono font-bold">
+              {pendingCount}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Interactive Placing Alert Banner */}
@@ -451,29 +519,41 @@ export default function StoragePage() {
                       Waiting for slot assignment
                     </span>
 
-                    <div className="grid grid-cols-2 gap-2 pt-1">
+                    <div className="flex flex-col gap-1.5 pt-1">
                       <button
                         type="button"
-                        onClick={() => handleStartPlacing(lot, "cold")}
-                        className={`py-1.5 px-2 rounded-sm text-xs font-bold font-sans transition-colors cursor-pointer ${
-                          isCurrentlyPlacing && suggestedZone === "cold"
-                            ? "bg-sky-700 text-white"
-                            : "bg-sky-600 text-white hover:bg-sky-700 shadow-xs"
-                        }`}
+                        onClick={() => handleAutoAssignOne(lid)}
+                        disabled={isAutoAssigning}
+                        className="w-full py-1.5 px-2 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white rounded-sm text-xs font-bold font-sans transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
                       >
-                        Assign to Cold
+                        <Zap className="size-3 text-amber-300 fill-amber-300" />
+                        <span>AI Auto-Assign Optimal Slot</span>
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => handleStartPlacing(lot, "frozen")}
-                        className={`py-1.5 px-2 rounded-sm text-xs font-bold font-sans transition-colors cursor-pointer ${
-                          isCurrentlyPlacing && suggestedZone === "frozen"
-                            ? "bg-indigo-700 text-white"
-                            : "bg-slate-100 text-zinc-800 border border-slate-300 hover:bg-slate-200"
-                        }`}
-                      >
-                        Assign to Frozen
-                      </button>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleStartPlacing(lot, "cold")}
+                          className={`py-1.5 px-2 rounded-sm text-xs font-bold font-sans transition-colors cursor-pointer ${
+                            isCurrentlyPlacing && suggestedZone === "cold"
+                              ? "bg-sky-700 text-white"
+                              : "bg-slate-100 text-zinc-800 border border-slate-300 hover:bg-slate-200"
+                          }`}
+                        >
+                          Manual Cold
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleStartPlacing(lot, "frozen")}
+                          className={`py-1.5 px-2 rounded-sm text-xs font-bold font-sans transition-colors cursor-pointer ${
+                            isCurrentlyPlacing && suggestedZone === "frozen"
+                              ? "bg-indigo-700 text-white"
+                              : "bg-slate-100 text-zinc-800 border border-slate-300 hover:bg-slate-200"
+                          }`}
+                        >
+                          Manual Frozen
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );

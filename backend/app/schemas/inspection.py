@@ -28,6 +28,11 @@ class InspectionResultSchema(BaseModel):
     hardware_signal: HardwareSignalType
     processing_time_ms: int
     image_url: str = ""
+    reason_summary: str = ""
+    agent_reasoning: str | None = None
+    adjudicated_by: str | None = None
+    storage_slot: str | None = None
+    storage_zone: str | None = None
 
     class Config:
         from_attributes = True

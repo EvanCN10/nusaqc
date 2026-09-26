@@ -462,6 +462,51 @@ export const ResultDetail = ({ lotId }: ResultDetailProps) => {
             </div>
           </div>
 
+          {/* Agent Adjudication Card (MP-01) */}
+          {(lot.agent_reasoning || lot.agentReasoning || lot.adjudicated_by === "agent" || lot.adjudicatedBy === "agent") && (
+            <div className="p-4 bg-sky-50/70 rounded-lg border border-sky-200 shadow-xs flex flex-col gap-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🤖</span>
+                  <h3 className="text-xs font-bold font-sans text-sky-950 uppercase tracking-wide">
+                    Agentic Adjudication (AWS Bedrock Multimodal)
+                  </h3>
+                </div>
+                <span className="text-[10px] font-mono font-bold bg-sky-100 text-sky-800 px-2 py-0.5 rounded-sm border border-sky-300">
+                  SNI 01-2729-2006
+                </span>
+              </div>
+              <p className="text-xs font-sans text-sky-900 leading-relaxed bg-white/80 p-2.5 rounded-sm border border-sky-100">
+                {lot.agent_reasoning || lot.agentReasoning}
+              </p>
+              <div className="flex items-center justify-between text-[11px] font-sans text-sky-700">
+                <span>Evaluasi Organoleptik Tahap 2: <strong>Status CONDITIONAL dialihkan ke {decision}</strong></span>
+                <span className="font-mono text-[10px]">AWS Bedrock Vision</span>
+              </div>
+            </div>
+          )}
+
+          {/* Storage Placement Card (MP-03) */}
+          {(lot.storage_slot || lot.storageSlot) && (
+            <div className="p-3.5 bg-indigo-50/70 rounded-lg border border-indigo-200 shadow-xs flex items-center justify-between text-xs font-sans">
+              <div className="flex items-center gap-2">
+                <span className="text-base">❄️</span>
+                <div>
+                  <span className="font-bold text-indigo-950 block">Cold-Chain Storage Allocated</span>
+                  <span className="text-[11px] text-indigo-700">
+                    Ditempatkan di Slot <strong className="font-mono">{lot.storage_slot || lot.storageSlot}</strong> ({lot.storage_zone || lot.storageZone || "cold"} zone)
+                  </span>
+                </div>
+              </div>
+              <Link
+                href="/storage"
+                className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-sm text-xs font-bold font-sans transition-colors cursor-pointer"
+              >
+                Lihat di Denah Storage
+              </Link>
+            </div>
+          )}
+
           {/* 4. Hardware Signal Sent Card */}
           <div className="p-3.5 bg-white rounded-lg border border-slate-200 shadow-xs flex items-center gap-3 text-xs font-mono">
             <Radio

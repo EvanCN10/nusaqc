@@ -11,10 +11,12 @@ from app.config import settings
 from app.ai import get_ai_engine
 from app.hardware import get_hardware_controller
 from app.services.decision_engine import DecisionEngine
+from app.services.agentic_adjudication import AgenticAdjudicationService
+from app.services.storage_allocator import SmartStorageAllocator
 from app.models.inspection_record import InspectionRecord
 from app.models.system_setting import SystemSetting
 from app.schemas.inspection import InspectionResultSchema, DefectSchema
-from app.core.websocket import ws_manager  # <--- Imported WebSocket Manager
+from app.core.websocket import ws_manager
 
 
 class InspectionService:
@@ -75,6 +77,24 @@ class InspectionService:
             confidence_threshold=threshold
         )
 
+        # 4b. MP-01 Agentic Adjudication Escalation for CONDITIONAL Status
+        agent_reasoning = None
+        adjudicated_by = None
+        if decision == "CONDITIONAL":
+            agent_result = await AgenticAdjudicationService.adjudicate(
+                image_bytes=image_bytes,
+                lot_id=lot_id,
+                grade=grade,
+                grade_confidence=grade_confidence,
+                defects_json=[d.dict() for d in defects_schemas],
+                fish_family=fish_family
+            )
+            decision = agent_result["final_decision"]
+            hardware_signal = "GREEN" if decision == "PASS" else "RED"
+            agent_reasoning = agent_result["agent_reasoning"]
+            adjudicated_by = agent_result["adjudicated_by"]
+            reason = f"[AI Agent Adjudication] {agent_reasoning}"
+
         # 5. Hardware Actuation
         hardware_controller = get_hardware_controller()
         hardware_controller.trigger_signal(hardware_signal)
@@ -95,11 +115,21 @@ class InspectionService:
             hardware_signal=hardware_signal,
             processing_time_ms=processing_time_ms,
             image_path=image_url,
-            reason_summary=reason
+            reason_summary=reason,
+            agent_reasoning=agent_reasoning,
+            adjudicated_by=adjudicated_by,
         )
         db.add(db_record)
         db.commit()
         db.refresh(db_record)
+
+        # 6b. MP-03 Smart Storage Auto-Assign for PASS lots
+        if decision == "PASS":
+            try:
+                SmartStorageAllocator.auto_assign(db=db, record=db_record)
+            except Exception as e:
+                # Keep inspection intact even if storage assignment encounters an issue
+                pass
 
         result_payload = InspectionResultSchema(
             lot_id=lot_id,
@@ -111,7 +141,12 @@ class InspectionService:
             decision=decision,
             hardware_signal=hardware_signal,
             processing_time_ms=processing_time_ms,
-            image_url=image_url
+            image_url=image_url,
+            reason_summary=reason,
+            agent_reasoning=agent_reasoning,
+            adjudicated_by=adjudicated_by,
+            storage_slot=db_record.storage_slot,
+            storage_zone=db_record.storage_zone,
         )
 
 

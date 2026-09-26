@@ -19,6 +19,8 @@ class InspectionRecord(Base):
     image_path = Column(String(255), nullable=True)
     inspector_note = Column(Text, nullable=True)
     reason_summary = Column(Text, nullable=True)
+    agent_reasoning = Column(Text, nullable=True)
+    adjudicated_by = Column(String(20), nullable=True)                       # "agent" | "human" | None
 
     # Storage and Dispatch Tracking
     storage_slot = Column(String(20), nullable=True, index=True)

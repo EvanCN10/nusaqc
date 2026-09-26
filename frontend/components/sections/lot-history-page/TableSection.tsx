@@ -226,8 +226,23 @@ export const TableSection = ({
                     </td>
 
                     {/* Decision */}
-                    <td className="px-4 py-3.5 w-32">
-                      <StatusBadge decision={rowDecision} />
+                    <td className="px-4 py-3.5 w-36">
+                      <div className="flex flex-col items-start gap-1">
+                        <StatusBadge decision={rowDecision} />
+                        {(lot.adjudicated_by === "agent" || lot.adjudicatedBy === "agent") && (
+                          <span
+                            className="inline-flex items-center gap-1 text-[10px] font-bold font-sans text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded-xs"
+                            title={lot.agent_reasoning || lot.agentReasoning || "Adjudikasi AI Bedrock"}
+                          >
+                            <span>🤖 AI Agent</span>
+                          </span>
+                        )}
+                        {(lot.adjudicated_by === "human" || lot.adjudicatedBy === "human") && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold font-sans text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-xs">
+                            <span>👤 Human Override</span>
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Confidence */}

@@ -93,7 +93,15 @@ def get_lots(
             "processing_time_ms": r.processing_time_ms,
             "ProcessingTimeMs": r.processing_time_ms, # For camelCase compatibility
             "image_path": r.image_path,
-            "imageUrl": r.image_path # For camelCase compatibility
+            "imageUrl": r.image_path, # For camelCase compatibility
+            "agent_reasoning": r.agent_reasoning,
+            "agentReasoning": r.agent_reasoning,
+            "adjudicated_by": r.adjudicated_by,
+            "adjudicatedBy": r.adjudicated_by,
+            "storage_slot": r.storage_slot,
+            "storageSlot": r.storage_slot,
+            "storage_zone": r.storage_zone,
+            "storageZone": r.storage_zone,
         }
         for r in records
     ]
@@ -138,6 +146,14 @@ def get_recent_lots(
             "processingTimeMs": r.processing_time_ms, # For camelCase compatibility
             "image_path": r.image_path,
             "imageUrl": r.image_path, # For camelCase compatibility
+            "agent_reasoning": r.agent_reasoning,
+            "agentReasoning": r.agent_reasoning,
+            "adjudicated_by": r.adjudicated_by,
+            "adjudicatedBy": r.adjudicated_by,
+            "storage_slot": r.storage_slot,
+            "storageSlot": r.storage_slot,
+            "storage_zone": r.storage_zone,
+            "storageZone": r.storage_zone,
         }
         for r in records
     ]
@@ -266,7 +282,15 @@ def get_lot_by_id(
         "defects": raw_defects,
         "inspector_note": record.inspector_note or "",
         "inspectorNote": record.inspector_note or "",
-        "reason_summary": record.reason_summary or ("Kualitas ikan memenuhi standar kelayakan ekspor (Grade " + record.grade + ")." if record.decision == "PASS" else ("Grade B dengan tingkat keyakinan moderat. Disarankan verifikasi visual operator." if record.decision == "CONDITIONAL" else "Terdeteksi defek fisik/kontaminasi pada permukaan ikan."))
+        "reason_summary": record.reason_summary or ("Kualitas ikan memenuhi standar kelayakan ekspor (Grade " + record.grade + ")." if record.decision == "PASS" else ("Grade B dengan tingkat keyakinan moderat. Disarankan verifikasi visual operator." if record.decision == "CONDITIONAL" else "Terdeteksi defek fisik/kontaminasi pada permukaan ikan.")),
+        "agent_reasoning": record.agent_reasoning,
+        "agentReasoning": record.agent_reasoning,
+        "adjudicated_by": record.adjudicated_by,
+        "adjudicatedBy": record.adjudicated_by,
+        "storage_slot": record.storage_slot,
+        "storageSlot": record.storage_slot,
+        "storage_zone": record.storage_zone,
+        "storageZone": record.storage_zone,
     }
 
 
@@ -336,6 +360,7 @@ async def override_lot_decision(
         record.hardware_signal = "RED"
 
     record.decision = new_decision
+    record.adjudicated_by = "human"
     existing_note = record.inspector_note or ""
     override_log = f"[OVERRIDE -> {new_decision}] {override_reason}"
     record.inspector_note = f"{existing_note}\n{override_log}".strip() if existing_note else override_log
@@ -351,7 +376,9 @@ async def override_lot_decision(
         "decision": record.decision,
         "hardware_signal": record.hardware_signal,
         "inspector_note": record.inspector_note,
-        "reason_summary": record.reason_summary
+        "reason_summary": record.reason_summary,
+        "adjudicated_by": record.adjudicated_by,
+        "adjudicatedBy": record.adjudicated_by
     }
 
 

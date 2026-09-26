@@ -40,6 +40,7 @@ class AIInferenceEngine:
             os.path.join(settings.MODEL_DIR, "freshness_classifier.onnx")
         ]
         self.defect_paths = [
+            os.path.join(settings.MODEL_DIR, "nusaqc_model2_defect_detector_int8.onnx"),
             os.path.join(settings.MODEL_DIR, "nusaqc_model2_defect_detector.onnx"),
             os.path.join(settings.MODEL_DIR, "defect_detector.onnx")
         ]

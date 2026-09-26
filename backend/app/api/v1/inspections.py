@@ -57,6 +57,10 @@ async def run_inspection(
         "freshnessNote": f"Grade {result.grade} ({int(result.grade_confidence * 100) if result.grade_confidence <= 1.0 else int(result.grade_confidence)}% confidence)",
         "processingTimeMs": result.processing_time_ms,
         "imageUrl": result.image_url,
+        "agentReasoning": result.agent_reasoning,
+        "adjudicatedBy": result.adjudicated_by,
+        "storageSlot": result.storage_slot,
+        "storageZone": result.storage_zone,
     })
     return res_dict
 

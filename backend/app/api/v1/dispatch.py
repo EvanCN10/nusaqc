@@ -9,9 +9,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
 from app.api.deps import get_db
+from app.config import settings
 from app.models.dispatch import Dispatch, DispatchLot
 from app.models.inspection_record import InspectionRecord
 from app.models.storage_slot import StorageSlot
+from app.services.pdf_service import QCCertificateGenerator
 
 router = APIRouter()
 
@@ -281,6 +283,96 @@ def update_dispatch_status(
         "new_status": new_status,
         "status": new_status
     }
+
+@router.get(
+    "/{dispatch_id}/certificate",
+    summary="Download Official Export QC Certificate (PDF)",
+    description="Generates and streams an official signed PDF QC Certificate with embedded QR code."
+)
+def download_dispatch_certificate(dispatch_id: str, db: Session = Depends(get_db)):
+    disp = db.query(Dispatch).filter(Dispatch.dispatch_id == dispatch_id).first()
+    if not disp:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Dispatch '{dispatch_id}' not found"
+        )
+
+    links = db.query(DispatchLot).filter(DispatchLot.dispatch_id == dispatch_id).all()
+    lot_ids = [link.lot_id for link in links]
+    lots = db.query(InspectionRecord).filter(InspectionRecord.lot_id.in_(lot_ids)).all() if lot_ids else []
+
+    total_lots = len(lots)
+    all_passed = all(l.decision == "PASS" for l in lots) if lots else True
+    avg_conf = (sum(l.grade_confidence for l in lots) / total_lots) if total_lots > 0 else 0.92
+    total_defects = sum(l.defects_count for l in lots)
+
+    dispatch_data = {
+        "dispatch_id": disp.dispatch_id,
+        "buyer_name": disp.buyer_name,
+        "destination": disp.destination,
+        "container_no": disp.container_no,
+        "dispatch_date": disp.dispatch_date.strftime("%Y-%m-%d %H:%M") if disp.dispatch_date else None,
+        "status": disp.status,
+        "notes": disp.notes,
+    }
+
+    lots_data = [
+        {
+            "lot_id": l.lot_id,
+            "fish_family": l.fish_family,
+            "grade": l.grade,
+            "grade_confidence": l.grade_confidence,
+            "defects_count": l.defects_count,
+            "decision": l.decision,
+            "hardware_signal": l.hardware_signal,
+            "adjudicated_by": l.adjudicated_by,
+            "timestamp": l.timestamp.strftime("%Y-%m-%d %H:%M") if l.timestamp else "-",
+        }
+        for l in lots
+    ]
+
+    qc_summary = {
+        "total_lots": total_lots,
+        "all_passed": all_passed,
+        "avg_confidence": round(avg_conf * 100, 1) if avg_conf <= 1.0 else round(avg_conf, 1),
+        "total_defects": total_defects,
+    }
+
+    try:
+        pdf_bytes = QCCertificateGenerator.generate_pdf(
+            dispatch_id=dispatch_id,
+            dispatch_data=dispatch_data,
+            lots_data=lots_data,
+            qc_summary=qc_summary,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate QC Certificate PDF: {str(e)}"
+        )
+
+    filename = f"NusaQC_Certificate_{dispatch_id}.pdf"
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"'
+        }
+    )
+
+@router.get(
+    "/{dispatch_id}/qrcode",
+    summary="Get Container Tracking QR Code Image",
+    description="Returns a PNG image of the QR code for container tracking."
+)
+def get_dispatch_qrcode(dispatch_id: str):
+    tracking_url = f"{settings.APP_PUBLIC_URL}/dispatch/{dispatch_id}"
+    qr_buf = QCCertificateGenerator.generate_qr_buffer(tracking_url, box_size=6, border=2)
+    return StreamingResponse(
+        qr_buf,
+        media_type="image/png",
+        headers={"Cache-Control": "public, max-age=3600"}
+    )
 
 @router.get(
     "/{dispatch_id}/export",
