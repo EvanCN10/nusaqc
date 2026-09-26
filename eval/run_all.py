@@ -84,30 +84,38 @@ def run_all_suites(selected_suite: str = "all") -> dict:
     summary_data["total_elapsed_seconds"] = round(total_elapsed, 2)
 
     # Load existing results for unexecuted suites if available
-    for idx, (res_var, filename, key) in enumerate([
-        (res_1, "core_accuracy_results.json", "core_accuracy"),
-        (res_2, "optical_robustness_results.json", "optical_robustness"),
-        (res_3, "edge_cases_results.json", "edge_cases"),
-        (res_4, "agentic_adjudication_results.json", "agentic_adjudication"),
-        (res_5, "async_stream_results.json", "async_stream"),
-        (res_6, "quantization_performance_results.json", "quantization_performance"),
-    ], 1):
-        f_path = RESULTS_DIR / filename
-        if locals()[f"res_{idx}"] is None and f_path.exists():
-            try:
-                loaded = json.loads(f_path.read_text(encoding="utf-8"))
-                locals()[f"res_{idx}"] = loaded
-                summary_data[key] = loaded
-                if loaded.get("suite_name") and loaded["suite_name"] not in summary_data["suites_executed"]:
-                    summary_data["suites_executed"].append(loaded["suite_name"])
-            except Exception:
-                pass
-    res_1 = locals().get("res_1")
-    res_2 = locals().get("res_2")
-    res_3 = locals().get("res_3")
-    res_4 = locals().get("res_4")
-    res_5 = locals().get("res_5")
-    res_6 = locals().get("res_6")
+    suite_files = {
+        1: (res_1, "core_accuracy_results.json", "core_accuracy"),
+        2: (res_2, "optical_robustness_results.json", "optical_robustness"),
+        3: (res_3, "edge_cases_results.json", "edge_cases"),
+        4: (res_4, "agentic_adjudication_results.json", "agentic_adjudication"),
+        5: (res_5, "async_stream_results.json", "async_stream"),
+        6: (res_6, "quantization_performance_results.json", "quantization_performance"),
+    }
+    loaded_results = {}
+    for idx, (res_var, filename, key) in suite_files.items():
+        if res_var is not None:
+            loaded_results[idx] = res_var
+        else:
+            f_path = RESULTS_DIR / filename
+            if f_path.exists():
+                try:
+                    loaded = json.loads(f_path.read_text(encoding="utf-8"))
+                    loaded_results[idx] = loaded
+                    summary_data[key] = loaded
+                    if loaded.get("suite_name") and loaded["suite_name"] not in summary_data["suites_executed"]:
+                        summary_data["suites_executed"].append(loaded["suite_name"])
+                except Exception:
+                    loaded_results[idx] = None
+            else:
+                loaded_results[idx] = None
+
+    res_1 = loaded_results.get(1)
+    res_2 = loaded_results.get(2)
+    res_3 = loaded_results.get(3)
+    res_4 = loaded_results.get(4)
+    res_5 = loaded_results.get(5)
+    res_6 = loaded_results.get(6)
     # Master Summary Table
     print_header(
         "RINGKASAN SKOR HASIL UJI TEST SUITE",
@@ -191,7 +199,7 @@ def run_all_suites(selected_suite: str = "all") -> dict:
     # Export markdown table
     markdown_path = RESULTS_DIR / "EVALUATION_ARTIFACT_TABLE.md"
     with open(markdown_path, "w", encoding="utf-8") as f:
-        f.write("# NusaQC Evaluation — Ringkasan Skor Saat Ini\n\n")
+        f.write("# NusaQC Evaluation - Ringkasan Skor Saat Ini\n\n")
         f.write("| " + " | ".join(artifact_headers) + " |\n")
         f.write("| " + " | ".join(["---"] * len(artifact_headers)) + " |\n")
         for row in artifact_rows:

@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
-import { Cpu, ChevronDown, Check } from "lucide-react";
+import React, { useState } from "react";
+import { Cpu, ChevronDown, Check, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { testDeviceConnection } from "@/lib/api";
 
 type HardwareProps = {
   mockMode: boolean;
@@ -26,6 +27,30 @@ export const Hardware = ({
   ipAddress,
   onIpAddressChange,
 }: HardwareProps) => {
+  const [isTesting, setIsTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string; latency?: number } | null>(null);
+
+  const handleTest = async () => {
+    if (!ipAddress) return;
+    setIsTesting(true);
+    setTestResult(null);
+    try {
+      const res = await testDeviceConnection(ipAddress);
+      setTestResult({
+        success: Boolean(res.success),
+        message: res.message || (res.success ? "Berhasil terhubung" : "Gagal terhubung"),
+        latency: res.latency_ms ?? res.latencyMs,
+      });
+    } catch (err: unknown) {
+      setTestResult({
+        success: false,
+        message: err instanceof Error ? err.message : "Gagal menghubungi backend API",
+      });
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
   return (
     <div className="w-full p-6 bg-white rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] outline outline-1 outline-slate-300/50 flex flex-col gap-6">
       {/* Section Header */}
@@ -149,29 +174,62 @@ export const Hardware = ({
             <label className="text-xs font-semibold uppercase tracking-wide font-sans text-gray-700">
               IP Address
             </label>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 px-3 py-2 bg-gray-100 rounded-md outline outline-1 outline-slate-300/50">
-                <input
-                  type="text"
-                  value={ipAddress}
-                  onChange={(e) => onIpAddressChange(e.target.value)}
-                  className="w-full bg-transparent text-sm font-medium font-mono text-gray-700 focus:outline-none"
-                />
+              <div className="flex flex-col gap-1.5 flex-1">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 px-3 py-2 bg-gray-100 rounded-md outline outline-1 outline-slate-300/50">
+                    <input
+                      type="text"
+                      value={ipAddress}
+                      onChange={(e) => {
+                        onIpAddressChange(e.target.value);
+                        setTestResult(null);
+                      }}
+                      placeholder="192.168.137.251:8080"
+                      className="w-full bg-transparent text-sm font-medium font-mono text-gray-700 focus:outline-none"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isTesting}
+                    onClick={handleTest}
+                    className="px-4 py-2 rounded-md outline outline-1 outline-sky-700 text-sky-700 text-sm font-bold font-sans hover:bg-sky-50 disabled:opacity-60 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+                  >
+                    {isTesting ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        <span>Testing...</span>
+                      </>
+                    ) : (
+                      <span>Test Connection</span>
+                    )}
+                  </button>
+                </div>
+                {testResult && (
+                  <div
+                    className={`mt-1 text-xs px-2.5 py-1.5 rounded flex items-center gap-1.5 ${
+                      testResult.success
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {testResult.success ? (
+                      <CheckCircle2 className="size-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <XCircle className="size-3.5 text-rose-600 shrink-0" />
+                    )}
+                    <span>{testResult.message}</span>
+                    {testResult.latency !== undefined && (
+                      <span className="font-mono text-[11px] font-semibold">
+                        ({testResult.latency} ms)
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  console.log("Testing hardware connection to:", ipAddress);
-                }}
-                className="px-4 py-2 rounded-md outline outline-1 outline-sky-700 text-sky-700 text-base font-bold font-sans hover:bg-sky-50 transition-colors cursor-pointer whitespace-nowrap"
-              >
-                Test Connection
-              </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

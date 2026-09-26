@@ -43,6 +43,7 @@ app.add_middleware(
 )
 
 # Static file serving for inspection images
+os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
 # REST API routes

@@ -33,7 +33,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated, isLoading, isPublicPage, isLoginPage, pathname, router]);
 
-  // Loading state during auth initialization
+  // Loading state during auth initialization (minimal spinner for dashboard/internal routes)
   if (isLoading) {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#030712] text-white">

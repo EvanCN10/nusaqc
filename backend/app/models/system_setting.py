@@ -13,3 +13,5 @@ class SystemSetting(Base):
     active_species = Column(String(255), default="Scombridae,Cichlidae,Salmonidae", nullable=False)
     mock_mode_enabled = Column(Boolean, default=True, nullable=False)
     auto_assign_storage = Column(Boolean, default=True, nullable=False)
+    raspberry_pi_ip = Column(String(128), default="192.168.137.251", nullable=True)
+    camera_source = Column(String(128), default="edge_mjpeg", nullable=True)

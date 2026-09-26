@@ -40,7 +40,7 @@ from eval.utils import (
 from app.ai.inference import AIInferenceEngine
 
 
-def run_core_accuracy_evaluation(save_results: bool = True) -> dict:
+def run_core_accuracy_evaluation(save_results: bool = True, defect_limit: Optional[int] = 25) -> dict:
     print_header(
         "TEST SUITE 1: EVALUASI AKURASI INTI & CONFUSION MATRIX",
         "Pengujian Model Freshness (MobileNetV3) & Defect Detector (YOLOv8s)"
@@ -56,7 +56,7 @@ def run_core_accuracy_evaluation(save_results: bool = True) -> dict:
     # 2. Load Evaluation Dataset
     print("\n[2/4] Memuat Seluruh Dataset Uji Riil (DaFiF Freshness & YOLO Defect)...")
     freshness_samples = load_real_freshness_dataset(sample_limit=None)
-    defect_samples = load_real_defect_dataset(sample_limit=None)
+    defect_samples = load_real_defect_dataset(sample_limit=defect_limit)
     print(f"  * Total Sampel Uji Freshness (DaFiF)   : {len(freshness_samples)} citra (Day 1..11, 3 Spesies)")
     print(f"  * Total Sampel Uji Defect (YOLO Valid) : {len(defect_samples)} citra beranotasi")
 

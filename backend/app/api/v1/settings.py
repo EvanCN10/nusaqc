@@ -1,18 +1,16 @@
-import re
+# app/api/v1/settings.py
 from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.orm import Session
-
-from app.api.deps import get_db
-from app.ai import get_ai_engine
+from app.core.database import get_db
 from app.models.system_setting import SystemSetting
+from app.ai import get_ai_engine
 from app.config import settings
 
 router = APIRouter()
 
-
 @router.get(
     "/models/status",
-    summary="Get AI Model Status & Metadata",
+    summary="Get Active AI Model Metadata",
     description="Powers AIModel.tsx with model versions, providers, and input shapes."
 )
 def get_models_status():
@@ -59,17 +57,16 @@ def get_settings(db: Session = Depends(get_db)):
 
     # Return dual-compatible payload (snake_case + camelCase)
     return {
-        # Confidence threshold
+        # Confidence
         "confidence_threshold": threshold,
         "confidenceThreshold": threshold,
-        "confidenceThresholdPercent": int(threshold * 100) if threshold <= 1.0 else int(threshold),
         
-        # CSV Export
+        # Auto Export
         "auto_export_csv": auto_export,
         "autoExportCsv": auto_export,
         "autoExportCSV": auto_export,
         
-        # Log retention
+        # Log Retention
         "log_retention_days": retention,
         "logRetentionDays": retention,
         "logRetention": f"{retention} days",
@@ -85,6 +82,10 @@ def get_settings(db: Session = Depends(get_db)):
         # Storage Auto Assign
         "auto_assign_storage": auto_assign,
         "autoAssignStorage": auto_assign,
+
+        # IoT Edge Configuration
+        "raspberry_pi_ip": getattr(record, "raspberry_pi_ip", "192.168.137.251:8080") or "192.168.137.251:8080",
+        "camera_source": getattr(record, "camera_source", "edge_mjpeg") or "edge_mjpeg"
     }
 
 @router.post(
@@ -133,15 +134,18 @@ async def save_settings(request: Request, db: Session = Depends(get_db)):
     if raw_retention is None:
         raw_retention = payload.get("logRetention")
     if raw_retention is not None:
-        if isinstance(raw_retention, str):
-            digits = re.findall(r"\d+", raw_retention)
-            retention = int(digits[0]) if digits else 30
-        else:
-            retention = int(raw_retention)
+        try:
+            if isinstance(raw_retention, str):
+                digits = "".join(filter(str.isdigit, raw_retention))
+                retention = int(digits) if digits else 30
+            else:
+                retention = int(raw_retention)
+        except (ValueError, TypeError):
+            retention = record.log_retention_days if record else 30
     else:
         retention = record.log_retention_days if record else 30
 
-    # 4. Parse Active Species Whitelist
+    # 4. Parse Active Species (list or comma-separated string)
     raw_species = payload.get("active_species")
     if raw_species is None:
         raw_species = payload.get("activeSpecies")
@@ -155,7 +159,7 @@ async def save_settings(request: Request, db: Session = Depends(get_db)):
     else:
         species_str = record.active_species if record else "Scombridae,Cichlidae,Salmonidae"
 
-    # 5. Parse Mock Mode
+    # 5. Parse Mock Mode (preserve existing DB value if not provided in payload)
     raw_mock = payload.get("mock_mode_enabled")
     if raw_mock is None:
         raw_mock = payload.get("mockModeEnabled")
@@ -184,7 +188,9 @@ async def save_settings(request: Request, db: Session = Depends(get_db)):
             log_retention_days=retention,
             active_species=species_str,
             mock_mode_enabled=mock_mode,
-            auto_assign_storage=auto_assign
+            auto_assign_storage=auto_assign,
+            raspberry_pi_ip=payload.get("raspberry_pi_ip", "192.168.137.251:8080"),
+            camera_source=payload.get("camera_source", "edge_mjpeg")
         )
         db.add(record)
     else:
@@ -195,6 +201,10 @@ async def save_settings(request: Request, db: Session = Depends(get_db)):
         record.mock_mode_enabled = mock_mode
         if hasattr(record, "auto_assign_storage"):
             record.auto_assign_storage = auto_assign
+        if "raspberry_pi_ip" in payload:
+            record.raspberry_pi_ip = payload["raspberry_pi_ip"]
+        if "camera_source" in payload:
+            record.camera_source = payload["camera_source"]
 
     db.commit()
     db.refresh(record)
@@ -215,5 +225,7 @@ async def save_settings(request: Request, db: Session = Depends(get_db)):
             "mockModeEnabled": record.mock_mode_enabled,
             "auto_assign_storage": getattr(record, "auto_assign_storage", True),
             "autoAssignStorage": getattr(record, "auto_assign_storage", True),
+            "raspberry_pi_ip": getattr(record, "raspberry_pi_ip", "192.168.137.251:8080"),
+            "camera_source": getattr(record, "camera_source", "edge_mjpeg")
         }
     }

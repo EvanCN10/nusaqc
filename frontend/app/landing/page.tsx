@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
+import { LandingLoadingScreen } from "@/components/landing/LandingLoadingScreen";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { LandingAbout } from "@/components/landing/LandingAbout";
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
 export default function LandingPage() {
   return (
     <SmoothScrollProvider>
+      <LandingLoadingScreen />
       <div className="min-h-screen bg-[#030712] text-white selection:bg-[#007BC0]/30 selection:text-white">
         <LandingNavbar />
         <main>
