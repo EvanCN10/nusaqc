@@ -18,7 +18,13 @@ DATABASE_PATH = BACKEND_DIR / "nusaqc.db"
 RESULTS_DIR = EVAL_DIR / "results"
 
 # Real Model Weights Paths (strictly verified, no simulation fallback)
-FRESHNESS_MODEL_PATH = MODEL_DIR / "mobilenetv3_freshness.onnx"
+if (MODEL_DIR / "mobilenetv3_freshness_weight.onnx").exists():
+    FRESHNESS_MODEL_PATH = MODEL_DIR / "mobilenetv3_freshness_weight.onnx"
+elif (MODEL_DIR / "mobilenetv3_freshness_int8.onnx").exists():
+    FRESHNESS_MODEL_PATH = MODEL_DIR / "mobilenetv3_freshness_int8.onnx"
+else:
+    FRESHNESS_MODEL_PATH = MODEL_DIR / "mobilenetv3_freshness.onnx"
+
 DEFECT_MODEL_PATH = MODEL_DIR / "nusaqc_model2_defect_detector.onnx"
 
 # Real Dataset Paths (from project datasets repository)
@@ -63,7 +69,7 @@ DEFECT_CLASS_NAMES_MAP = {0: "sisik_sisa", 1: "warna_abnormal", 2: "luka_robekan
 TARGET_FISH_FAMILIES = ["Scombridae", "Cichlidae", "Salmonidae"]
 
 # Model Weight Filenames
-FRESHNESS_MODEL_NAME = "mobilenetv3_freshness.onnx"
+FRESHNESS_MODEL_NAME = FRESHNESS_MODEL_PATH.name
 DEFECT_MODEL_NAME = "nusaqc_model2_defect_detector.onnx"
 # Operational Inference Thresholds
 DEFECT_CONF_THRESHOLD = 0.55
