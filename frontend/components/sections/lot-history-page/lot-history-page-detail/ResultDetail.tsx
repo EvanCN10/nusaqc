@@ -529,7 +529,7 @@ export const ResultDetail = ({ lotId }: ResultDetailProps) => {
                     : "text-emerald-600"
                 }`}
               >
-                ● {rawSignal} — Conveyor {rawSignal === "RED" ? "REJECT signal activated" : rawSignal === "YELLOW" ? "SLOW / MANUAL VERIFY signal activated" : "PASS / SORT signal activated"}
+                ● {rawSignal}  -  Conveyor {rawSignal === "RED" ? "REJECT signal activated" : rawSignal === "YELLOW" ? "SLOW / MANUAL VERIFY signal activated" : "PASS / SORT signal activated"}
               </span>
             </div>
           </div>

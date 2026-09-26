@@ -60,8 +60,8 @@ export const Sidebar = () => {
   const roleStyle = getRoleBadgeStyle(user?.role);
 
   return (
-    <aside className="h-screen sticky top-0 bg-slate-900 flex flex-col shadow-lg overflow-y-auto overflow-x-hidden w-64 shrink-0 border-r border-slate-800">
-      <div className="h-16 px-4 border-b border-slate-800 flex items-center gap-3 bg-slate-950">
+    <aside className="fixed inset-y-0 left-0 z-40 w-64 h-screen bg-slate-900 flex flex-col shadow-lg overflow-y-auto overflow-x-hidden border-r border-slate-800">
+      <div className="h-16 px-4 border-b border-slate-800 flex items-center gap-3 bg-slate-950 shrink-0">
         <img className="w-8 h-8 object-contain" src="/logo.svg" alt="NusaQC Logo" />
         <div className="flex flex-col">
           <span className="text-white text-lg font-bold font-sans leading-tight">
@@ -90,8 +90,25 @@ export const Sidebar = () => {
         ))}
       </nav>
 
+      {/* Public Landing Page Link */}
+      <div className="px-3 py-2 border-t border-slate-800/80 shrink-0">
+        <Link
+          href="/landing"
+          target="_blank"
+          className="w-full flex items-center justify-between px-2.5 py-1.5 rounded text-xs text-slate-400 hover:text-sky-300 hover:bg-slate-800/60 transition-colors"
+        >
+          <span className="flex items-center gap-2">
+            <span className="size-1.5 rounded-full bg-sky-400 animate-pulse" />
+            Public Showcase
+          </span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">
+            /landing &rarr;
+          </span>
+        </Link>
+      </div>
+
       {/* Dynamic User Session & RBAC Badge */}
-      <div className="p-3.5 border-t border-white/10 flex items-center justify-between mt-auto bg-slate-950/60">
+      <div className="p-3.5 border-t border-white/10 flex items-center justify-between mt-auto bg-slate-950/60 shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
           <div
             className={`size-8 ${roleStyle.avatarBg} rounded-full flex justify-center items-center shrink-0 shadow-sm`}

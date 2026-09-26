@@ -131,3 +131,48 @@
     font-family: inherit !important;
   }
 }
+
+/* === NusaQC Custom Liquid Glass & Typography Styles === */
+.font-instrument {
+  font-family: var(--font-instrument), "Instrument Serif", Georgia, serif;
+}
+
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.025);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 12px 32px 0 rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-glass-glow {
+  box-shadow: 0 0 35px -5px rgba(0, 123, 192, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+.liquid-glass-amber-glow {
+  box-shadow: 0 0 35px -5px rgba(255, 189, 7, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Lenis Smooth Scroll Recommended Rules */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}

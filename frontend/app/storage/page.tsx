@@ -22,11 +22,15 @@ import {
   clearStorageSlot,
   autoAssignStorageLot,
   autoAssignAllStorageLots,
+  fetchSettings,
+  saveSettings,
 } from "@/lib/api";
 import { StorageOverview, StorageSlot, LotRecord } from "@/types";
 import { SlotDetailDrawer } from "@/components/sections/storage-page/SlotDetailDrawer";
 import { useAuth } from "@/lib/auth";
 import { Switch } from "@/components/ui/Switch";
+
+const STORAGE_AUTO_ASSIGN_KEY = "nusaqc_storage_auto_assign_enabled";
 
 export default function StoragePage() {
   const [overview, setOverview] = useState<StorageOverview | null>(null);
@@ -35,8 +39,51 @@ export default function StoragePage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAutoAssigning, setIsAutoAssigning] = useState<boolean>(false);
   const { user } = useAuth();
-  const [isAutoAssignEnabled, setIsAutoAssignEnabled] = useState<boolean>(true);
+  const [isAutoAssignEnabled, setIsAutoAssignEnabled] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(STORAGE_AUTO_ASSIGN_KEY);
+      if (saved !== null) {
+        return saved === "true";
+      }
+    }
+    return true;
+  });
   const canToggleAutoAssign = user?.role === "supervisor" || user?.role === "admin";
+
+  // Rehydrate from backend system settings
+  useEffect(() => {
+    fetchSettings()
+      .then((cfg) => {
+        const val = cfg.auto_assign_storage ?? cfg.autoAssignStorage;
+        if (typeof val === "boolean") {
+          setIsAutoAssignEnabled(val);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(STORAGE_AUTO_ASSIGN_KEY, String(val));
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleToggleAutoAssign = async (checked: boolean) => {
+    if (!canToggleAutoAssign) return;
+    setIsAutoAssignEnabled(checked);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_AUTO_ASSIGN_KEY, String(checked));
+    }
+    try {
+      await saveSettings({ auto_assign_storage: checked });
+      setNotification({
+        type: "success",
+        text: checked
+          ? "Fitur Smart Auto-Assign diaktifkan (PASS lots otomatis dialokasikan ke storage)."
+          : "Fitur Smart Auto-Assign dinonaktifkan (PASS lots menunggu penempatan manual).",
+      });
+      setTimeout(() => setNotification(null), 3500);
+    } catch (err) {
+      console.error("Gagal menyinkronkan status Auto-Assign ke backend:", err);
+    }
+  };
 
   // Interactive Placing Mode State
   const [placingLot, setPlacingLot] = useState<LotRecord | null>(null);
@@ -49,7 +96,7 @@ export default function StoragePage() {
   const [isClearing, setIsClearing] = useState<boolean>(false);
 
   const handleAutoAssignAll = async () => {
-    if (pendingLots.length === 0) return;
+    if (pendingLots.length === 0 || !isAutoAssignEnabled) return;
     setIsAutoAssigning(true);
     try {
       const res = await autoAssignAllStorageLots();
@@ -70,6 +117,7 @@ export default function StoragePage() {
   };
 
   const handleAutoAssignOne = async (lotId: string) => {
+    if (!isAutoAssignEnabled) return;
     setIsAutoAssigning(true);
     try {
       const res = await autoAssignStorageLot(lotId);
@@ -274,7 +322,7 @@ export default function StoragePage() {
             <Switch
               id="smart-auto-assign-toggle"
               checked={isAutoAssignEnabled}
-              onCheckedChange={canToggleAutoAssign ? setIsAutoAssignEnabled : () => {}}
+              onCheckedChange={canToggleAutoAssign ? handleToggleAutoAssign : () => {}}
               disabled={!canToggleAutoAssign}
             />
             <label
@@ -328,7 +376,7 @@ export default function StoragePage() {
           <div className="flex items-center gap-2 text-sm font-sans font-medium">
             <Info className="size-5 shrink-0" />
             <span>
-              Placing: <strong className="font-mono">{placingLot.lotId || placingLot.lot_id}</strong> ({placingLot.fishFamily || placingLot.fish_family || "Tuna"}, Grade {placingLot.grade || "A"}) — Klik slot hijau yang kosong untuk menempatkan lot.
+              Placing: <strong className="font-mono">{placingLot.lotId || placingLot.lot_id}</strong> ({placingLot.fishFamily || placingLot.fish_family || "Tuna"}, Grade {placingLot.grade || "A"})  -  Klik slot hijau yang kosong untuk menempatkan lot.
             </span>
           </div>
           <button

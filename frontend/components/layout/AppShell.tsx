@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import { Loader2 } from "lucide-react";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -13,34 +12,53 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const isLoginPage = pathname === "/login";
+  const isLandingPage = pathname === "/landing";
+  const isPublicPage = isLoginPage || isLandingPage;
 
   useEffect(() => {
     if (!isLoading) {
-      if (!isAuthenticated && !isLoginPage) {
-        router.replace("/login");
+      if (!isAuthenticated) {
+        if (!isPublicPage) {
+          // If first-time visit directly to root, open /landing
+          if (pathname === "/") {
+            router.replace("/landing");
+          } else {
+            // If accessing protected routes without session, route to /login
+            router.replace("/login");
+          }
+        }
       } else if (isAuthenticated && isLoginPage) {
         router.replace("/");
       }
     }
-  }, [isAuthenticated, isLoading, isLoginPage, router]);
+  }, [isAuthenticated, isLoading, isPublicPage, isLoginPage, pathname, router]);
 
   // Loading state during auth initialization
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-950 text-white">
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#030712] text-white">
         <div className="flex flex-col items-center gap-3">
           <div className="size-10 rounded-full border-2 border-sky-500 border-t-transparent animate-spin" />
           <p className="text-xs font-semibold text-sky-400 tracking-wider uppercase font-mono">
-            NusaQC • Memeriksa Sesi...
+            NusaQC - Initializing Terminal...
           </p>
         </div>
       </div>
     );
   }
 
-  // Standalone Login page view (no sidebar / topbar)
+  // Standalone Login page view
   if (isLoginPage) {
-    return <div className="min-h-screen w-full bg-slate-950 text-slate-100">{children}</div>;
+    return <div className="min-h-screen w-full bg-[#030712] text-slate-100">{children}</div>;
+  }
+
+  // Standalone Landing page view (full-screen immersive, no dashboard chrome)
+  if (isLandingPage) {
+    return (
+      <div className="min-h-screen w-full bg-[#030712] text-slate-100 overflow-x-hidden selection:bg-[#007BC0] selection:text-white">
+        {children}
+      </div>
+    );
   }
 
   // Not authenticated redirecting...
@@ -48,13 +66,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return null;
   }
 
-  // Authenticated full dashboard shell
+  // Authenticated full dashboard shell with unified Inter typography & fixed viewport sidebar
   return (
-    <div className="min-h-screen flex bg-slate-100 overflow-x-hidden antialiased font-sans">
+    <div className="min-h-screen bg-slate-100 antialiased font-sans">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-slate-100">
+      <div className="pl-64 flex flex-col min-h-screen min-w-0">
         <Topbar />
-        <main className="flex-1 flex flex-col overflow-auto">{children}</main>
+        <main className="flex-1 flex flex-col">{children}</main>
       </div>
     </div>
   );

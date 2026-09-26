@@ -123,10 +123,13 @@ class InspectionService:
         db.commit()
         db.refresh(db_record)
 
-        # 6b. MP-03 Smart Storage Auto-Assign for PASS lots
+        # 6b. MP-03 Smart Storage Auto-Assign for PASS lots (respects auto_assign_storage setting)
         if decision == "PASS":
             try:
-                SmartStorageAllocator.auto_assign(db=db, record=db_record)
+                cfg = db.query(SystemSetting).filter(SystemSetting.key == "global_config").first()
+                is_auto_enabled = bool(cfg.auto_assign_storage) if (cfg and hasattr(cfg, "auto_assign_storage") and cfg.auto_assign_storage is not None) else True
+                if is_auto_enabled:
+                    SmartStorageAllocator.auto_assign(db=db, record=db_record)
             except Exception as e:
                 # Keep inspection intact even if storage assignment encounters an issue
                 pass

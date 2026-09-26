@@ -1,4 +1,4 @@
-# NusaQC — AI-Powered Visual Quality Control & Digital Traceability System
+# NusaQC - AI-Powered Visual Quality Control & Digital Traceability System
 
 [![COMPFEST 18](https://img.shields.io/badge/AIC-COMPFEST%2018%20(2026)-0284c7?style=flat-square)](https://compfest.id)
 [![Track](https://img.shields.io/badge/Track-Smart%20Manufacturing-16a34a?style=flat-square)](https://compfest.id)
