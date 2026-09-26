@@ -1,4 +1,4 @@
-# PANDUAN LENGKAP — NusaQC Frontend: Dari Kondisi Sekarang ke GitHub Push
+# PANDUAN LENGKAP - NusaQC Frontend: Dari Kondisi Sekarang ke GitHub Push
 
 > Dibuat: 2026-08-07  
 > Tujuan: Panduan bertahap untuk menyelesaikan setup frontend agar bisa di-push ke GitHub dan backend bisa langsung bekerja paralel.
@@ -8,13 +8,13 @@
 ## Daftar Isi
 
 1. [Kondisi Saat Ini (Audit)](#1-kondisi-saat-ini-audit)
-2. [Fase 1 — Perbaiki `app/layout.tsx` (Global Shell)](#2-fase-1--perbaiki-applayout-tsx-global-shell)
-3. [Fase 2 — Buat Struktur Routing (Folder & File `page.tsx`)](#3-fase-2--buat-struktur-routing-folder--file-pagetsx)
-4. [Fase 3 — Bersihkan `app/page.tsx` (Dashboard)](#4-fase-3--bersihkan-apppagetsx-dashboard)
-5. [Fase 4 — Buat Page Skeleton untuk Setiap Halaman](#5-fase-4--buat-page-skeleton-untuk-setiap-halaman)
-6. [Fase 5 — Setup Environment & Koneksi API](#6-fase-5--setup-environment--koneksi-api)
-7. [Fase 6 — Siapkan `.gitignore` & File Dokumentasi](#7-fase-6--siapkan-gitignore--file-dokumentasi)
-8. [Fase 7 — Push ke GitHub](#8-fase-7--push-ke-github)
+2. [Fase 1 - Perbaiki `app/layout.tsx` (Global Shell)](#2-fase-1--perbaiki-applayout-tsx-global-shell)
+3. [Fase 2 - Buat Struktur Routing (Folder & File `page.tsx`)](#3-fase-2--buat-struktur-routing-folder--file-pagetsx)
+4. [Fase 3 - Bersihkan `app/page.tsx` (Dashboard)](#4-fase-3--bersihkan-apppagetsx-dashboard)
+5. [Fase 4 - Buat Page Skeleton untuk Setiap Halaman](#5-fase-4--buat-page-skeleton-untuk-setiap-halaman)
+6. [Fase 5 - Setup Environment & Koneksi API](#6-fase-5--setup-environment--koneksi-api)
+7. [Fase 6 - Siapkan `.gitignore` & File Dokumentasi](#7-fase-6--siapkan-gitignore--file-dokumentasi)
+8. [Fase 7 - Push ke GitHub](#8-fase-7--push-ke-github)
 9. [Wawasan Industri: Mengapa Urutan Ini Penting?](#9-wawasan-industri-mengapa-urutan-ini-penting)
 
 ---
@@ -54,7 +54,7 @@
 
 ---
 
-## 2. Fase 1 — Perbaiki `app/layout.tsx` (Global Shell)
+## 2. Fase 1 - Perbaiki `app/layout.tsx` (Global Shell)
 
 **Mengapa ini paling pertama?**
 
@@ -76,7 +76,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "NusaQC — Fish Quality Control AI",
+  title: "NusaQC - Fish Quality Control AI",
   description: "AI-powered visual quality control system for fish processing units.",
 };
 
@@ -102,7 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ---
 
-## 3. Fase 2 — Buat Struktur Routing (Folder & File `page.tsx`)
+## 3. Fase 2 - Buat Struktur Routing (Folder & File `page.tsx`)
 
 **Aturan dasar Next.js App Router:**
 - Folder = URL segment
@@ -143,7 +143,7 @@ Gunakan pola yang sama untuk `history/page.tsx`, `history/[lotId]/page.tsx`, dan
 
 ---
 
-## 4. Fase 3 — Bersihkan `app/page.tsx` (Dashboard)
+## 4. Fase 3 - Bersihkan `app/page.tsx` (Dashboard)
 
 Hapus semua import komponen testing dan ganti dengan struktur yang rapi:
 
@@ -166,7 +166,7 @@ export default function DashboardPage() {
 
 ---
 
-## 5. Fase 4 — Buat Page Skeleton untuk Setiap Halaman
+## 5. Fase 4 - Buat Page Skeleton untuk Setiap Halaman
 
 Setiap `page.tsx` hanya mengimpor section. Contoh untuk `/inspection`:
 
@@ -209,7 +209,7 @@ export default async function LotDetailPage({ params }: PageProps) {
 
 ---
 
-## 6. Fase 5 — Setup Environment & Koneksi API
+## 6. Fase 5 - Setup Environment & Koneksi API
 
 ### 6.1 Buat `.env.local` (JANGAN di-commit ke Git)
 
@@ -298,7 +298,7 @@ export type HardwareStatus = {
 
 ---
 
-## 7. Fase 6 — Siapkan `.gitignore` & File Dokumentasi
+## 7. Fase 6 - Siapkan `.gitignore` & File Dokumentasi
 
 ### 7.1 Pastikan `.gitignore` Sudah Benar
 
@@ -318,7 +318,7 @@ node_modules/
 ### 7.2 Buat `frontend/README.md`
 
 ```markdown
-# NusaQC — Frontend
+# NusaQC - Frontend
 
 ## Prasyarat
 - Node.js >= 20
@@ -353,13 +353,13 @@ Backend harus berjalan di: http://localhost:8000
 
 ---
 
-## 8. Fase 7 — Push ke GitHub
+## 8. Fase 7 - Push ke GitHub
 
 ```bash
 # 1. Pastikan kamu di root monorepo (nusaqc/), bukan di dalam frontend/
 cd ..
 
-# 2. Cek status — pastikan .env.local TIDAK muncul di daftar ini
+# 2. Cek status - pastikan .env.local TIDAK muncul di daftar ini
 git status
 
 # 3. Tambahkan semua perubahan
@@ -372,7 +372,7 @@ git commit -m "feat(frontend): setup routing structure, layout, and component fo
 git push origin main
 ```
 
-> **Wajib diingat — Conventional Commits:**
+> **Wajib diingat - Conventional Commits:**
 > Format: `type(scope): pesan`
 > - `feat` = Fitur baru
 > - `fix` = Perbaikan bug

@@ -12,4 +12,4 @@ class SystemSetting(Base):
     log_retention_days = Column(Integer, default=30, nullable=False)
     active_species = Column(String(255), default="Scombridae,Cichlidae,Salmonidae", nullable=False)
     mock_mode_enabled = Column(Boolean, default=True, nullable=False)
-
+    auto_assign_storage = Column(Boolean, default=True, nullable=False)

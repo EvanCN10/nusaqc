@@ -1,11 +1,11 @@
 > [!WARNING]
-> **README INI BERSIFAT SEMENTARA — KHUSUS UNTUK TIM INTERNAL (Backend & AI)**
+> **README INI BERSIFAT SEMENTARA - KHUSUS UNTUK TIM INTERNAL (Backend & AI)**
 > Dokumen ini dibuat untuk membantu tim bekerja secara paralel sebelum MVP selesai.
 > README ini **belum dioptimasi untuk juri**. Revisi final akan dilakukan setelah seluruh fitur MVP (frontend + backend + AI) selesai diintegrasikan.
 
 ---
 
-# NusaQC — Frontend
+# NusaQC - Frontend
 
 **AI-Powered Visual Quality Control System for Fish Processing Units**
 

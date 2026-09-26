@@ -1,4 +1,4 @@
-# NusaQC — Laporan Evaluasi Baseline & Analisis Kelemahan Sistem AI
+# NusaQC - Laporan Evaluasi Baseline & Analisis Kelemahan Sistem AI
 **Dokumen:** Rekapitulasi Komprehensif Hasil Automated Test Suite (Fase 1 Baseline)  
 **Tanggal Pengujian:** 26 September 2026  
 **Infrastruktur Evaluasi:** `webdev/eval/` (ONNX Runtime CPU, Standar SNI 2729:2013)  

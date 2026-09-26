@@ -158,7 +158,7 @@ export default function DispatchDetailPage() {
           {dispatch.dispatch_id || dispatch.dispatchId}
         </h1>
         <p className="text-sm font-sans text-gray-500 mt-1 font-medium">
-          {dispatch.buyer_name || dispatch.buyerName} — {flag} {dispatch.destination}
+          {dispatch.buyer_name || dispatch.buyerName}  -  {flag} {dispatch.destination}
         </p>
       </div>
 

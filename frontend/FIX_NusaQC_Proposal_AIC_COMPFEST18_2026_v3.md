@@ -1,4 +1,4 @@
-# NusaQC — AI-Powered Visual Quality Control System
+# NusaQC - AI-Powered Visual Quality Control System
 ## Dokumen Spesifikasi & Proposal Inovasi
 ### AIC COMPFEST 18 · 2026 · Smart Manufacturing
 
@@ -32,10 +32,10 @@
 **NusaQC** adalah sistem inspeksi mutu dan pemilah otomatis berbasis Computer Vision yang dirancang untuk menggantikan proses Quality Control (QC) manual di lini sortasi Unit Pengolahan Ikan (UPI) ekspor Indonesia.
 
 **Visi Utama Produk (Production Vision):**
-NusaQC dirancang sebagai **Sistem Pemilah Otomatis Kontinyu di Atas Conveyor Belt** (*Continuous Automated Conveyor Inspection*) — kamera industri memindai setiap ikan secara terus-menerus seiring conveyor bergerak, tanpa interupsi alur produksi.
+NusaQC dirancang sebagai **Sistem Pemilah Otomatis Kontinyu di Atas Conveyor Belt** (*Continuous Automated Conveyor Inspection*) - kamera industri memindai setiap ikan secara terus-menerus seiring conveyor bergerak, tanpa interupsi alur produksi.
 
 **Strategi MVP Babak Penyisihan COMPFEST 18:**
-Pada fase penyisihan ini, sistem diimplementasikan dengan skema **Synchronous Snapshot Inspection** (*Capture on Trigger*) — memproses satu foto per ikan per trigger sensor — sebagai *trade-off* strategis untuk memenuhi batasan rulebook COMPFEST 18 (sistem sinkron, tanpa background streaming, dapat dijalankan via `docker-compose up` di CPU biasa). Transisi dari mode snapshot ke mode continuous adalah target eksplisit **Babak Final Hackathon 10 Jam**.
+Pada fase penyisihan ini, sistem diimplementasikan dengan skema **Synchronous Snapshot Inspection** (*Capture on Trigger*) - memproses satu foto per ikan per trigger sensor - sebagai *trade-off* strategis untuk memenuhi batasan rulebook COMPFEST 18 (sistem sinkron, tanpa background streaming, dapat dijalankan via `docker-compose up` di CPU biasa). Transisi dari mode snapshot ke mode continuous adalah target eksplisit **Babak Final Hackathon 10 Jam**.
 
 Sistem berjalan dengan menangkap satu frame foto ikan saat melewati titik inspeksi (*Capture on Trigger*), lalu menjalankan dua model AI secara berurutan:
 
@@ -50,7 +50,7 @@ Hasil inspeksi dikirimkan secara real-time ke:
 
 ### 1.2 Positioning Statement
 
-> *"NusaQC adalah sistem inspeksi mutu dan pemilah otomatis berbasis Computer Vision yang visinya menjadi Continuous Automated Conveyor Inspector di lini sortasi UPI — mendeteksi kesegaran dan kontaminasi fisik ikan secara objektif, konsisten, dan terdokumentasi digital sesuai standar ekspor internasional (FDA/RASFF/EU). Untuk Babak Penyisihan COMPFEST 18, sistem dihadirkan dalam mode MVP sinkron (Snapshot per Trigger) yang sepenuhnya mematuhi rulebook, dengan arsitektur modular yang siap ditingkatkan ke mode continuous pada Babak Final Hackathon."*
+> *"NusaQC adalah sistem inspeksi mutu dan pemilah otomatis berbasis Computer Vision yang visinya menjadi Continuous Automated Conveyor Inspector di lini sortasi UPI - mendeteksi kesegaran dan kontaminasi fisik ikan secara objektif, konsisten, dan terdokumentasi digital sesuai standar ekspor internasional (FDA/RASFF/EU). Untuk Babak Penyisihan COMPFEST 18, sistem dihadirkan dalam mode MVP sinkron (Snapshot per Trigger) yang sepenuhnya mematuhi rulebook, dengan arsitektur modular yang siap ditingkatkan ke mode continuous pada Babak Final Hackathon."*
 
 ### 1.3 Nilai Bisnis (Business Value)
 
@@ -72,7 +72,7 @@ Berdasarkan kritisasi, scope penerima manfaat **WAJIB dipersempit**. Target prim
 
 **Jumlah Target Terverifikasi:**
 - Per November 2022, BKIPM KKP mencatat **2.406 UPI telah memiliki sertifikat HACCP** *(Sumber: KKP, Desember 2022)*
-- Dari 127.787 frekuensi ekspor pada 2022, terdapat **8 kasus penolakan resmi (0,006%)** — namun angka ini mencakup penolakan di titik masuk negara tujuan, bukan cacat yang dibuang saat pra-ekspor *(Sumber: BKIPM KKP, 2022)*
+- Dari 127.787 frekuensi ekspor pada 2022, terdapat **8 kasus penolakan resmi (0,006%)** - namun angka ini mencakup penolakan di titik masuk negara tujuan, bukan cacat yang dibuang saat pra-ekspor *(Sumber: BKIPM KKP, 2022)*
 - UPI yang aktif mengekspor ke China saja berjumlah **386 UPI (2023)** dan **522 UPI (2024)** *(Sumber: ANTARA/KKP, 2025)*
 
 **Estimasi TAM yang Realistis:**
@@ -91,7 +91,7 @@ Berdasarkan kritisasi, scope penerima manfaat **WAJIB dipersempit**. Target prim
 Indonesia adalah kekuatan ekspor perikanan global. Data 2022 menunjukkan:
 
 - **Nilai ekspor perikanan Jan–Nov 2022:** USD 5,71 miliar (volume 1,11 juta ton), tumbuh **10,66%** dari periode yang sama 2021 *(Sumber: BPS/KKP, Jan 2023)*
-- **Target 2022 yang tidak tercapai:** USD 7,13 miliar — artinya ada selisih USD 1,42 miliar yang gagal terealisasi
+- **Target 2022 yang tidak tercapai:** USD 7,13 miliar - artinya ada selisih USD 1,42 miliar yang gagal terealisasi
 - **Komoditas utama:** Udang (28,1%), Tuna-Cakalang-Tongkol (12,4%), Cumi-Sotong-Gurita (10,1%) *(Sumber: KKP, 2022)*
 - **Negara tujuan utama:** Amerika Serikat (47,5%), Tiongkok, Jepang, ASEAN, Uni Eropa
 
@@ -104,7 +104,7 @@ Industri sebesar ini sangat rentan terhadap satu masalah struktural: **kegagalan
 Penelitian peer-reviewed dari Jurnal *Industria* (Desember 2022), yang menganalisis data FDA-OASIS dan RASFF periode 2010–2020, menemukan:
 
 > *"Dalam periode yang diamati, terdapat 2.318 kasus penolakan di Amerika Serikat dan 79 di Eropa. Berdasarkan analisis Pareto, faktor utama yang menyumbang lebih dari 80% penolakan di AS adalah **filthy** (kontaminasi fisik) dan **Salmonella**."*
-> *(Nurkhasanah et al., 2022 — Industria: Jurnal Teknologi dan Manajemen Agroindustri, Vol. 11, No. 2, pp. 165-176)*
+> *(Nurkhasanah et al., 2022 - Industria: Jurnal Teknologi dan Manajemen Agroindustri, Vol. 11, No. 2, pp. 165-176)*
 
 **Breakdown Faktor Penolakan di Pasar AS (2010–2020):**
 
@@ -133,7 +133,7 @@ FDA memberlakukan *Detention Without Physical Examination (DWPE)* untuk udang In
 
 **Interpretasi untuk NusaQC:**
 - Komponen *filthy* (kontaminasi fisik) adalah **domain valid untuk Computer Vision**
-- Komponen *Salmonella* adalah kontaminasi mikrobiologis yang **wajib diuji laboratorium** — bukan domain CV
+- Komponen *Salmonella* adalah kontaminasi mikrobiologis yang **wajib diuji laboratorium** - bukan domain CV
 - NusaQC secara eksplisit mengatasi **komponen filthy** dan **indikator visual penurunan kualitas**
 
 ### 2.3 Root Cause Analysis: Mengapa Masalah Filthy Persisten?
@@ -193,13 +193,13 @@ CURRENT STATE (Kondisi QC Manual Saat Ini)
 ──────────────────────────────────────────
 • Metode    : Inspeksi visual oleh 2-3 orang operator per lini
 • Kecepatan : ~5–10 detik/ikan (bergantung volume & kondisi operator)
-• Akurasi   : Tidak konsisten — "segar menurut siapa?" berbeda antar orang
+• Akurasi   : Tidak konsisten - "segar menurut siapa?" berbeda antar orang
 • Dokumentasi: Kertas (tally sheet manual), tidak ada timestamp digital
 • Feedback  : Ikan reject dibuang secara manual SETELAH terlihat oleh operator
 • Traceability: Tidak ada → hambatan audit ekspor FDA/RASFF
 • Biaya SDM : 2–3 operator/lini × Rp 3,5–4 jt/bulan = ~Rp 7–12 jt/lini/bulan
 
-INTERMEDIATE STATE (NusaQC MVP — Babak Penyisihan COMPFEST 18)
+INTERMEDIATE STATE (NusaQC MVP - Babak Penyisihan COMPFEST 18)
 ───────────────────────────────────────────────────────────────
 • Metode    : Synchronous Snapshot Inspection (1 foto per trigger)
               → Kepatuhan rulebook: sinkron, tanpa background streaming
@@ -210,12 +210,12 @@ INTERMEDIATE STATE (NusaQC MVP — Babak Penyisihan COMPFEST 18)
 • Traceability: Digital, exportable, audit-ready
 • Biaya CAPEX: ~Rp 3–4 juta per titik inspeksi (hardware)
 
-TARGET STATE (NusaQC Production Vision — Pabrik Nyata)
+TARGET STATE (NusaQC Production Vision - Pabrik Nyata)
 ───────────────────────────────────────────────────────
 • Metode    : Continuous Automated Conveyor Inspection
               → Kamera memindai ikan terus-menerus seiring conveyor berjalan
               → Frame rate disesuaikan dengan kecepatan conveyor industri
-• Kecepatan : Inspeksi paralel — throughput mengikuti laju conveyor (target ≥ 100 ikan/menit)
+• Kecepatan : Inspeksi paralel - throughput mengikuti laju conveyor (target ≥ 100 ikan/menit)
 • Integrasi : Stream video masuk → queue inference → hasil real-time ke aktuator
 • Roadmap   : Dicapai pada Babak Final Hackathon (26 September 2026, 10 jam luring)
               melalui implementasi async inference + pipeline buffering
@@ -224,19 +224,19 @@ TARGET STATE (NusaQC Production Vision — Pabrik Nyata)
 **Peta Jalan Menuju Continuous Automated Inspection:**
 
 ```
-FASE 1 (Penyisihan — Snapshot MVP)
+FASE 1 (Penyisihan - Snapshot MVP)
    Capture on Trigger (1 foto/ikan/trigger)
    └── Sinkron, lokal, CPU biasa, docker-compose up
          │
-         │  [Babak Final Hackathon — 10 Jam Luring, Fasilkom UI]
+         │  [Babak Final Hackathon - 10 Jam Luring, Fasilkom UI]
          ▼
-FASE 2 (Final — Continuous Mode)
+FASE 2 (Final - Continuous Mode)
    Continuous Frame Capture + Async Inference Queue
    └── Frame rate → Queue → Parallel ONNX inference workers
    └── Throughput: mengikuti kecepatan conveyor industri
          │
          ▼
-FASE 3 (Production — Enterprise Scale)
+FASE 3 (Production - Enterprise Scale)
    Multi-camera, distributed inference, cloud dashboard
    └── Deployment di UPI ekspor aktif
 ```
@@ -275,7 +275,7 @@ Dengan adanya historical QC data per lot, supervisor UPI dapat mengidentifikasi 
 **Kritisasi Rayka** menyebutkan bahwa sistem sebelumnya hanya bersifat "Smart Inspection" karena output AI tidak memberikan umpan balik ke mesin produksi. Ini adalah kelemahan yang **telah diperbaiki** dalam versi revisi.
 
 **Definisi Smart Manufacturing (sesuai tema AIC COMPFEST 18):**
-> *"Penerapan AI di proses pengolahan dan operasi pabrik"* — termasuk kendali lini produksi secara otomatis berdasarkan data sensor/AI.
+> *"Penerapan AI di proses pengolahan dan operasi pabrik"* - termasuk kendali lini produksi secara otomatis berdasarkan data sensor/AI.
 
 **Closed-Loop Control Architecture NusaQC:**
 
@@ -432,7 +432,7 @@ Dengan adanya **Closed-Loop Control** (AI output → sinyal fisik ke mesin), Nus
 │                                                                       │
 └─────────────────────────────────────────────────────────────────────┘
                               ║
-                              ║  [Babak Final Hackathon — 10 Jam Luring]
+                              ║  [Babak Final Hackathon - 10 Jam Luring]
                               ║  26 September 2026, Fasilkom UI
                               ▼
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -447,7 +447,7 @@ Dengan adanya **Closed-Loop Control** (AI output → sinyal fisik ke mesin), Nus
 │  • Dynamic throughput tuning sesuai kecepatan conveyor               │
 │                                                                       │
 │  Arsitektur MVP saat ini dirancang modular agar upgrade ini          │
-│  tidak memerlukan perombakan total — hanya penambahan layer          │
+│  tidak memerlukan perombakan total - hanya penambahan layer          │
 │  async di atas inference engine yang sudah ada.                      │
 │                                                                       │
 └─────────────────────────────────────────────────────────────────────┘
@@ -555,7 +555,7 @@ def execute_hardware_action(decision: str, mock_mode: bool):
             GPIO.output(TOWER_LIGHT_YELLOW_PIN, GPIO.HIGH)
             buzzer_short_beep()
         else:
-            GPIO.output(TOWER_LIGHT_GREEN_PIN, GPIO.HIGH) # Grade A — aman
+            GPIO.output(TOWER_LIGHT_GREEN_PIN, GPIO.HIGH) # Grade A - aman
 ```
 
 ### 6.4 Mock Hardware Mode untuk Demonstrasi Juri
@@ -604,7 +604,7 @@ services:
 |-----------|-------|
 | Backbone | MobileNetV3-Small |
 | Export Format | ONNX (opset 17) |
-| Input Shape | `(1, 3, 224, 224)` — RGB, normalized |
+| Input Shape | `(1, 3, 224, 224)` - RGB, normalized |
 | Output | 3 kelas: Grade A / Grade B / Grade C + confidence score |
 | Target mAP/Accuracy | ≥ 85% F1-score pada test set |
 | Inference latency (ONNX CPU RPi5) | ~150–300ms |
@@ -723,7 +723,7 @@ DATASET STRATEGY & MODEL MAPPING
         Motion Blur (gerakan conveyor), dan Brightness/Contrast Jittering
 ```
 
-**Engineering Decision Record (EDR) — Model Selection:**
+**Engineering Decision Record (EDR) - Model Selection:**
 
 ```
 EDR-001: Mengapa YOLOv8n dan bukan YOLOv8s/m?
@@ -817,12 +817,12 @@ Sesuai ketentuan Rulebook COMPFEST 18 (Batasan Ketat MVP), scope NusaQC untuk fa
 - ❌ Auto-tuning model parameters
 
 **Yang Direncanakan untuk Babak Final Hackathon (10 Jam Luring):**
-- 🎯 **Continuous Automated Conveyor Mode** — upgrade dari Snapshot ke streaming async
+- 🎯 **Continuous Automated Conveyor Mode** - upgrade dari Snapshot ke streaming async
 - 🎯 Async inference worker pool (multi-threaded ONNX sessions)
 - 🎯 Frame buffer queue untuk decoupling capture & inference
 - 🎯 Dynamic throughput tuning
 
-> **Catatan Arsitektur:** Pemilihan FastAPI sebagai backend bukan sekadar kebutuhan MVP — FastAPI mendukung async/await natively, sehingga upgrade ke continuous mode di Final Hackathon hanya membutuhkan penambahan layer async di atas inference engine yang sudah ada, **tanpa perombakan arsitektur total**.
+> **Catatan Arsitektur:** Pemilihan FastAPI sebagai backend bukan sekadar kebutuhan MVP - FastAPI mendukung async/await natively, sehingga upgrade ke continuous mode di Final Hackathon hanya membutuhkan penambahan layer async di atas inference engine yang sudah ada, **tanpa perombakan arsitektur total**.
 
 ### 8.2 Alur Pengembangan Model (Per Feature)
 
@@ -980,7 +980,7 @@ Berikut adalah bukti kepatuhan terhadap seluruh ketentuan Rulebook COMPFEST 18 (
 | 1 | Proyek merupakan inovasi di bidang AI for Backbone Economy | ✅ | Smart Manufacturing: CV-based QC di lini produksi UPI |
 | 2 | Proyek merupakan karya orisinal tim | ✅ | Tidak menggunakan project lama; dibuat periode 17 Juni–25 Agustus 2026 |
 | 3 | Proyek hanya dikerjakan selama perlombaan berlangsung | ✅ | Repository dibuat fresh, commit history dari mulai lomba |
-| 4 | Proyek penyisihan wajib dilanjutkan ke Final | ✅ | Arsitektur modular dirancang eksplisit untuk iterasi di hackathon final — upgrade snapshot → continuous mode |
+| 4 | Proyek penyisihan wajib dilanjutkan ke Final | ✅ | Arsitektur modular dirancang eksplisit untuk iterasi di hackathon final - upgrade snapshot → continuous mode |
 
 ### 9.2 Batasan MVP (Scope Compliance)
 
@@ -989,7 +989,7 @@ Berikut adalah bukti kepatuhan terhadap seluruh ketentuan Rulebook COMPFEST 18 (
 | **Frontend** | UI wajib hanya berfokus pada alur interaksi inti | ✅ Hanya: upload foto → tampil hasil. Tidak ada advanced dashboard |
 | **Frontend** | Tidak perlu dashboard analitik tingkat lanjut | ✅ Tidak ada time-series analytics di MVP |
 | **Frontend** | Tidak perlu sistem otentikasi kompleks | ✅ Tidak ada multi-role auth |
-| **Backend** | Arsitektur wajib hanya sampai pemrosesan sinkron | ✅ FastAPI sync endpoint — Snapshot per Trigger, tidak ada background streaming |
+| **Backend** | Arsitektur wajib hanya sampai pemrosesan sinkron | ✅ FastAPI sync endpoint - Snapshot per Trigger, tidak ada background streaming |
 | **Backend** | Tidak perlu background jobs / auto data logging | ✅ Logging hanya saat request masuk (per trigger) |
 | **Backend** | Tidak perlu infrastruktur database terdistribusi | ✅ SQLite lokal murni |
 | **Backend** | Fokus agar API/sistem lokal dapat dijalankan via docker-compose | ✅ `docker-compose up` langsung running |
@@ -1075,13 +1075,13 @@ Control        │ → aktuasi (sekuensial)     │ result → aktuasi (paralel)
 ```
 REVENUE MODEL
 ─────────────
-Tier 1 — Starter (per titik inspeksi)
+Tier 1 - Starter (per titik inspeksi)
   Harga   : Rp 1.500.000/bulan per unit NusaQC
   Target  : UPI menengah (1–2 lini sortasi)
   Include : Hardware kit (RPi5 + kamera + actuator) + Software license
             + Setup support + 1 tahun garansi hardware
 
-Tier 2 — Business (per UPI)
+Tier 2 - Business (per UPI)
   Harga   : Rp 3.500.000/bulan (up to 5 titik inspeksi)
   Target  : UPI besar (multiple lini sortasi)
   Include : Semua Tier 1 + Priority support + Model retraining quarterly
@@ -1168,7 +1168,7 @@ Dengan NusaQC (estimasi reduksi penolakan 50%):
 - [ ] Format nama: `COMPFEST 18 AIC: PROOF OF WORK - [Nama Tim] - NusaQC`
 - [ ] Menampilkan double screen: terminal + aplikasi
 - [ ] Timestamp visible di terminal
-- [ ] Tidak ada CUT atau edit memotong — hanya fast-forward bagian loading
+- [ ] Tidak ada CUT atau edit memotong - hanya fast-forward bagian loading
 - [ ] Semua fitur di video ini ada juga di video promosi
 - [ ] Jujur tentang fitur yang belum beres (dengan penjelasan)
 

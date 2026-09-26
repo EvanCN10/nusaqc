@@ -6,7 +6,9 @@ import { AIModel } from "@/components/sections/settings-page/AIModel";
 import { ExportSettings } from "@/components/sections/settings-page/ExportSettings";
 import { BottomSection } from "@/components/sections/settings-page/BottomSection";
 import { fetchSettings, saveSettings } from "@/lib/api";
-import { CheckCircle2, AlertCircle } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { CheckCircle2, AlertCircle, ShieldAlert, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 const DEFAULT_SETTINGS = {
   mockMode: true,
@@ -18,6 +20,8 @@ const DEFAULT_SETTINGS = {
 };
 
 export default function SettingsPage() {
+  const { user } = useAuth();
+
   const [mockMode, setMockMode] = useState(DEFAULT_SETTINGS.mockMode);
   const [cameraSource, setCameraSource] = useState(DEFAULT_SETTINGS.cameraSource);
   const [ipAddress, setIpAddress] = useState(DEFAULT_SETTINGS.ipAddress);
@@ -80,9 +84,30 @@ export default function SettingsPage() {
     setSaveMessage(null);
   };
 
+  // RBAC Access Guard: Block Operator role from viewing or editing settings
+  if (user?.role === "operator") {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 max-w-xl mx-auto min-h-[60vh] text-center">
+        <div className="size-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-4">
+          <ShieldAlert className="size-8 text-amber-500" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-800 font-sans">Akses Halaman Dibatasi</h2>
+        <p className="text-sm text-slate-600 mt-2 font-sans">
+          Sesi Anda saat ini (<strong>QC Operator</strong>) tidak memiliki izin untuk mengonfigurasi parameter sistem hardware dan AI model. Halaman ini hanya dapat diakses oleh <strong>QC Supervisor</strong> atau <strong>System Admin</strong>.
+        </p>
+        <Link
+          href="/"
+          className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-md shadow-xs transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="size-4" />
+          Kembali ke Dashboard
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6 p-6 max-w-5xl mx-auto w-full">
-
       {saveMessage && (
         <div
           className={`p-3 rounded-md border flex items-center gap-2 text-sm font-sans ${

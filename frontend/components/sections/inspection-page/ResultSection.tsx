@@ -41,7 +41,7 @@ const gradeColorMap: Record<string, { bg: string; text: string; border: string; 
     border: "border-green-500",
     ring: "outline-green-500/30",
     progress: "bg-green-600",
-    desc: "Kualitas Prima — Standar Ekspor (SNI 2729:2013)",
+    desc: "Kualitas Prima  -  Standar Ekspor (SNI 2729:2013)",
   },
   B: {
     bg: "bg-amber-50",
@@ -49,7 +49,7 @@ const gradeColorMap: Record<string, { bg: string; text: string; border: string; 
     border: "border-amber-500",
     ring: "outline-amber-500/30",
     progress: "bg-amber-500",
-    desc: "Kualitas Baik — Standar Konsumsi Pasar Domestik",
+    desc: "Kualitas Baik  -  Standar Konsumsi Pasar Domestik",
   },
   C: {
     bg: "bg-red-50",
@@ -57,7 +57,7 @@ const gradeColorMap: Record<string, { bg: string; text: string; border: string; 
     border: "border-red-500",
     ring: "outline-red-500/30",
     progress: "bg-red-600",
-    desc: "Kualitas Rendah / Busuk — Rekomendasi Reject",
+    desc: "Kualitas Rendah / Busuk  -  Rekomendasi Reject",
   },
 };
 

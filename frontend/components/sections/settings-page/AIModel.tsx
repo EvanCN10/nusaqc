@@ -68,7 +68,7 @@ export const AIModel = ({
           <div className="flex justify-between items-start">
             <div>
               <span className="text-sm font-bold font-sans text-zinc-900 block">
-                Model 1 — Freshness Classifier
+                Model 1  -  Freshness Classifier
               </span>
               <span className="text-xs text-gray-500 font-sans">
                 Standar Organoleptik SNI 2729:2013 (Grade A, B, C)
@@ -92,7 +92,7 @@ export const AIModel = ({
           <div className="flex justify-between items-start">
             <div>
               <span className="text-sm font-bold font-sans text-zinc-900 block">
-                Model 2 — Surface Defect Detector
+                Model 2  -  Surface Defect Detector
               </span>
               <span className="text-xs text-gray-500 font-sans">
                 YOLOv8s Real-Time Object Detection (4 Classes)

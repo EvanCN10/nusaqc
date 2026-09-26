@@ -1,4 +1,4 @@
-# NusaQC Evaluation — Ringkasan Skor Baseline (Fase 1)
+# NusaQC Evaluation - Ringkasan Skor Baseline (Fase 1)
 
 | Skrip Test Suite | Fokus Evaluasi | Skor Saat Ini | Status / Keterangan |
 | --- | --- | --- | --- |

@@ -92,7 +92,7 @@ export const HardwareStatus = ({ status: propStatus, isLoading = false }: Hardwa
         </div>
       </div>
 
-      {/* Footer — Mock Toggle */}
+      {/* Footer  -  Mock Toggle */}
       <div className="pt-3 border-t border-slate-200 flex flex-col gap-1.5">
         <div className="flex justify-between items-center">
           <div className="flex flex-col">

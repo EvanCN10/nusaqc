@@ -36,14 +36,14 @@ export const Topbar = () => {
   const pathname = usePathname();
 
   return (
-    <header className="w-full h-16 px-6 bg-white border-b border-slate-200 flex justify-between items-center sticky top-0 z-30 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.04)] shrink-0">
+    <header className="w-full h-16 px-6 bg-white border-b border-slate-200 flex justify-between items-center sticky top-0 z-30 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.04)] shrink-0 font-sans">
       <div className="flex items-center">
-        <h1 className="text-sky-700 text-xl font-bold font-sans tracking-tight">
+        <h1 className="text-slate-900 text-xl font-bold font-sans tracking-tight">
           {renderPageTitle(pathname)}
         </h1>
       </div>
       <div className="flex items-center gap-4">
-        <div className="px-3 py-1 rounded-full outline outline-1 outline-offset-[-1px] outline-green-600 flex items-center gap-2 bg-green-50/60">
+        <div className="px-3 py-1 rounded-full outline outline-1 outline-offset-[-1px] outline-green-600 flex items-center gap-2 bg-green-50/60 font-sans">
           <WifiHigh className="size-4 text-green-600" />
           <span className="text-green-700 text-xs font-semibold font-sans">
             AI Camera: Online
@@ -63,5 +63,3 @@ export const Topbar = () => {
     </header>
   );
 };
-
-
