@@ -36,6 +36,8 @@ class AIInferenceEngine:
         self.defect_class_map = ALL_DEFECT_CLASSES.copy()
         
         self.freshness_paths = [
+            os.path.join(settings.MODEL_DIR, "mobilenetv3_freshness_weight.onnx"),
+            os.path.join(settings.MODEL_DIR, "mobilenetv3_freshness_int8.onnx"),
             os.path.join(settings.MODEL_DIR, "mobilenetv3_freshness.onnx"),
             os.path.join(settings.MODEL_DIR, "freshness_classifier.onnx")
         ]

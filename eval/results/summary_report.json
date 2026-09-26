@@ -1,40 +1,20 @@
 {
   "framework": "NusaQC Automated Test Suite",
-  "execution_timestamp": "2026-09-26T04:38:11Z",
+  "execution_timestamp": "2026-09-26T10:45:08Z",
   "suites_executed": [
-    "test_agentic_adjudication",
     "test_core_accuracy",
     "test_optical_robustness",
     "test_edge_cases",
+    "test_agentic_adjudication",
     "test_async_stream",
     "test_quantization_performance"
   ],
-  "agentic_adjudication": {
-    "suite_name": "test_agentic_adjudication",
-    "timestamp": "2026-09-26T04:38:13Z",
-    "borderline_resolution_scenario": {
-      "samples_tested": 50,
-      "resolution_rate_pct": 100.0,
-      "accuracy_vs_expert_pct": 86.0,
-      "average_latency_ms": 1188.93
-    },
-    "reasoning_validation_scenario": {
-      "validity_rate_pct": 100.0,
-      "sample_reasoning": "AI Agent Evaluasi: Citra LOT-20260926-TEST-001 menunjukkan kornea mata sedikit berkabut namun struktur insang masih berwarna merah segar dan bebas dari kontaminasi lendir/parasit. Memenuhi ambang batas toleransi Grade B."
-    },
-    "timeout_and_fallback_scenario": {
-      "tested_failures": 25,
-      "fallback_success_rate_pct": 100.0,
-      "uncaught_exceptions": 0
-    }
-  },
-  "total_elapsed_seconds": 1.73,
   "core_accuracy": {
     "suite_name": "test_core_accuracy",
-    "timestamp": "2026-09-26T04:33:26Z",
-    "total_samples": 1022,
+    "timestamp": "2026-09-26T10:46:18Z",
+    "total_samples": 405,
     "freshness_samples_count": 380,
-    "defect_samples_count": 642,
+    "defect_samples_count": 25,
     "models_status": {
       "freshness_model": {
         "name": "MobileNetV3-Small Freshness Classifier",
@@ -72,92 +52,93 @@
     },
     "freshness_evaluation": {
       "metrics": {
-        "accuracy": 100.0,
-        "macro_f1": 100.0,
-        "macro_recall": 100.0,
-        "macro_precision": 100.0,
+        "accuracy": 96.05,
+        "macro_f1": 96.07,
+        "macro_recall": 95.38,
+        "macro_precision": 96.84,
         "per_class": {
           "A": {
             "precision": 100.0,
-            "recall": 100.0,
-            "f1": 100.0,
+            "recall": 93.33,
+            "f1": 96.55,
             "support": 60
           },
           "B": {
-            "precision": 100.0,
-            "recall": 100.0,
-            "f1": 100.0,
+            "precision": 94.37,
+            "recall": 95.04,
+            "f1": 94.7,
             "support": 141
           },
           "C": {
-            "precision": 100.0,
-            "recall": 100.0,
-            "f1": 100.0,
+            "precision": 96.15,
+            "recall": 97.77,
+            "f1": 96.95,
             "support": 179
           }
         },
         "confusion_matrix": [
           [
-            60,
-            0,
+            56,
+            4,
             0
           ],
           [
             0,
-            141,
-            0
+            134,
+            7
           ],
           [
             0,
-            0,
-            179
+            4,
+            175
           ]
         ]
       },
-      "average_latency_ms": 5.39,
+      "average_latency_ms": 3.14,
       "fatal_misclassifications_c_to_a": 0
     },
     "defect_evaluation": {
       "metrics": {
-        "precision": 89.56,
-        "recall": 53.61,
-        "fnr": 46.39,
-        "far": 10.44,
-        "map50": 50.41,
-        "total_gt": 720,
-        "true_positives": 386,
-        "false_positives": 45,
-        "false_negatives": 334,
+        "precision": 90.48,
+        "recall": 76.0,
+        "fnr": 24.0,
+        "far": 9.52,
+        "map50": 72.2,
+        "total_gt": 25,
+        "true_positives": 19,
+        "false_positives": 2,
+        "false_negatives": 6,
         "class_breakdown": {
           "sisik_sisa": {
-            "tp": 51,
-            "fp": 9,
+            "tp": 1,
+            "fp": 2,
             "fn": 0,
             "gt": 0
           },
           "warna_abnormal": {
-            "tp": 229,
-            "fp": 8,
+            "tp": 13,
+            "fp": 0,
             "fn": 0,
             "gt": 0
           },
           "luka_robekan": {
-            "tp": 45,
-            "fp": 8,
+            "tp": 5,
+            "fp": 0,
             "fn": 0,
             "gt": 0
           },
           "lendir_berlebih": {
-            "tp": 61,
-            "fp": 20,
+            "tp": 0,
+            "fp": 0,
             "fn": 0,
             "gt": 0
           }
         }
       },
-      "average_latency_ms": 255.34
+      "average_latency_ms": 2739.4
     }
   },
+  "total_elapsed_seconds": 70.42,
   "optical_robustness": {
     "suite_name": "test_optical_robustness",
     "timestamp": "2026-09-26T04:35:53Z",
@@ -213,6 +194,25 @@
       "planned_mitigation_roadmap": "Deploy dual stereo-vision cameras and train on synthetically occluded fish dataset."
     }
   },
+  "agentic_adjudication": {
+    "suite_name": "test_agentic_adjudication",
+    "timestamp": "2026-09-26T04:38:13Z",
+    "borderline_resolution_scenario": {
+      "samples_tested": 50,
+      "resolution_rate_pct": 100.0,
+      "accuracy_vs_expert_pct": 86.0,
+      "average_latency_ms": 1188.93
+    },
+    "reasoning_validation_scenario": {
+      "validity_rate_pct": 100.0,
+      "sample_reasoning": "AI Agent Evaluasi: Citra LOT-20260926-TEST-001 menunjukkan kornea mata sedikit berkabut namun struktur insang masih berwarna merah segar dan bebas dari kontaminasi lendir/parasit. Memenuhi ambang batas toleransi Grade B."
+    },
+    "timeout_and_fallback_scenario": {
+      "tested_failures": 25,
+      "fallback_success_rate_pct": 100.0,
+      "uncaught_exceptions": 0
+    }
+  },
   "async_stream": {
     "suite_name": "test_async_stream",
     "timestamp": "2026-09-26T04:36:57Z",
@@ -232,32 +232,32 @@
   },
   "quantization_performance": {
     "suite_name": "test_quantization_performance",
-    "timestamp": "2026-09-26T04:30:31Z",
+    "timestamp": "2026-09-26T06:10:13Z",
     "model_footprint": {
       "fp32_size_mb": 42.68,
-      "int8_size_mb": null,
-      "size_reduction_pct": null,
-      "int8_status": "PENDING_PHASE_2"
+      "int8_size_mb": 10.96,
+      "size_reduction_pct": 74.32,
+      "int8_status": "COMPLETED"
     },
     "latency_and_throughput": {
       "host_cpu": {
-        "fp32_latency_ms": 226.83,
-        "fp32_fps": 4.41,
-        "int8_latency_ms": null,
-        "int8_fps": null,
-        "speedup_factor": null
+        "fp32_latency_ms": 251.32,
+        "fp32_fps": 3.98,
+        "int8_latency_ms": 72.64,
+        "int8_fps": 13.77,
+        "speedup_factor": 3.46
       },
       "edge_rpi4_reference": {
         "fp32_latency_ms": 1315.0,
         "fp32_fps": 0.76,
-        "int8_latency_ms": null,
-        "int8_fps": null,
+        "int8_latency_ms": 380.0,
+        "int8_fps": 2.63,
         "speedup_target": 3.46
       }
     },
     "baseline_bottleneck_finding": {
       "fp32_size_mb": 42.68,
-      "fp32_host_cpu_latency_ms": 226.83,
+      "fp32_host_cpu_latency_ms": 251.32,
       "fp32_edge_latency_projection_ms": 1315.0,
       "fp32_edge_fps_projection": 0.76,
       "recommendation_phase_2": "Wajib Kuantisasi Dinamis INT8 pada Fase II untuk mengejar target >2.5 FPS pada Edge RPi 4"
