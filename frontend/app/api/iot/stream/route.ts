@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       // @ts-expect-error - Next.js fetch supports duplex for streaming
       duplex: "half",
       cache: "no-store",
-      signal: request.signal,
+      signal: request.signal || AbortSignal.timeout(3500),
     });
 
     if (!upstream.ok) {

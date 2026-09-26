@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
     const upstream = await fetch(snapshotUrl, {
       cache: "no-store",
       headers: { Accept: "image/jpeg, image/*" },
+      signal: AbortSignal.timeout(3000),
     });
 
     if (!upstream.ok) {
