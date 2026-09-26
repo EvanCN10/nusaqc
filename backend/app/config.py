@@ -16,6 +16,16 @@ class Settings(BaseSettings):
     MODEL_DIR: str = "./models_weights"
     UPLOAD_DIR: str = "./uploads"
 
+    # AWS Bedrock Configuration
+    AWS_REGION: str = "us-east-1"
+    AWS_BEARER_TOKEN_BEDROCK: str = ""
+    AWS_BEDROCK_MODEL_ID: str = "amazon.nova-pro-v1:0"
+
+    # Certificate & Tracking Configuration
+    CERTIFICATE_ISSUER: str = "PT Nusantara Quality Control"
+    CERTIFICATE_STANDARD: str = "SNI 01-2729:2013 | HACCP Level II"
+    APP_PUBLIC_URL: str = "http://localhost:3000"
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

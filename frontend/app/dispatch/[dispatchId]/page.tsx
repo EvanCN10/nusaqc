@@ -37,6 +37,7 @@ export default function DispatchDetailPage() {
   const [dispatch, setDispatch] = useState<DispatchRecord | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [isExportingPdf, setIsExportingPdf] = useState<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -73,6 +74,30 @@ export default function DispatchDetailPage() {
 
   const handleExportCsv = () => {
     window.open(`${API_BASE}/api/v1/dispatch/${dispatchId}/export`, "_blank");
+  };
+
+  const handleExportPdf = async () => {
+    setIsExportingPdf(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/dispatch/${dispatchId}/certificate`);
+      if (!response.ok) {
+        throw new Error("Gagal mengunduh sertifikat PDF");
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `NusaQC_Certificate_${dispatchId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to export PDF:", err);
+      alert("Gagal mengunduh sertifikat PDF. Pastikan backend aktif.");
+    } finally {
+      setIsExportingPdf(false);
+    }
   };
 
   if (isLoading) {
@@ -372,16 +397,65 @@ export default function DispatchDetailPage() {
               </div>
             </div>
 
-            {/* Export Summary Button (Planned for Final) */}
-            <button
-              type="button"
-              disabled
-              title="Available in Final version"
-              className="w-full py-2.5 rounded-sm border border-slate-200 bg-slate-100 text-gray-400 font-bold text-xs font-sans flex items-center justify-center gap-2 cursor-not-allowed shadow-none mt-1"
-            >
-              <Download className="size-4 text-gray-400" />
-              <span>Export Summary (PDF)</span>
-            </button>
+            {/* Export Actions */}
+            <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={handleExportPdf}
+                disabled={isExportingPdf}
+                className="w-full py-2.5 rounded-sm bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs font-sans flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs disabled:opacity-60"
+              >
+                {isExportingPdf ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    <span>Generating Official PDF...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="size-4" />
+                    <span>Export QC Certificate (PDF)</span>
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={handleExportCsv}
+                className="w-full py-2 rounded-sm border border-slate-200 bg-white hover:bg-slate-50 text-zinc-700 font-bold text-xs font-sans flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
+                <Download className="size-3.5 text-gray-500" />
+                <span>Download Manifest (CSV)</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 3. Container Tracking & QR Seal Card */}
+          <div className="bg-white rounded-lg shadow-xs outline outline-1 outline-slate-300 p-6 flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <span className="text-[11px] font-bold font-mono text-gray-500 uppercase tracking-wider">
+                CONTAINER QR TRACKING
+              </span>
+              <span className="text-[10px] font-mono bg-sky-50 text-sky-700 px-2 py-0.5 rounded font-bold border border-sky-200">
+                SNI 01-2729
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="p-1.5 bg-white border border-slate-200 rounded-lg shadow-xs shrink-0">
+                <img
+                  src={`${API_BASE}/api/v1/dispatch/${dispatchId}/qrcode`}
+                  alt="Container QR Code"
+                  className="size-20 rounded object-contain"
+                />
+              </div>
+              <div className="flex flex-col gap-1 text-xs font-sans">
+                <span className="font-bold text-zinc-900">Digital Container Seal</span>
+                <span className="text-[11px] text-gray-500 leading-tight">
+                  Scan untuk otentikasi digital sertifikat mutu & manifest kontainer ekspor secara instan di pelabuhan.
+                </span>
+                <span className="font-mono text-[10px] text-sky-600 mt-1 font-semibold break-all">
+                  Container: {dispatch.container_no || dispatch.containerNo || "-"}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

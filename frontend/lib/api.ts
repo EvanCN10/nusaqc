@@ -204,6 +204,30 @@ export async function clearStorageSlot(slotId: string) {
   return res.json();
 }
 
+export async function autoAssignStorageLot(lotId: string) {
+  const res = await fetch(`${API_BASE}/api/v1/storage/auto-assign`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ lot_id: lotId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Gagal auto-assign slot" }));
+    throw new Error(err.detail || "Gagal melakukan smart auto-assign");
+  }
+  return res.json();
+}
+
+export async function autoAssignAllStorageLots() {
+  const res = await fetch(`${API_BASE}/api/v1/storage/auto-assign-all`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Gagal auto-assign semua slot" }));
+    throw new Error(err.detail || "Gagal melakukan auto-assign massal");
+  }
+  return res.json();
+}
+
 // ----------------------------------------------------
 // DISPATCH API METHODS
 // ----------------------------------------------------

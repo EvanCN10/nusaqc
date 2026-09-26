@@ -228,3 +228,76 @@ def clear_slot(slot_id: str, db: Session = Depends(get_db)):
         "message": f"Slot {slot_id} cleared successfully",
         "slot_id": slot_id
     }
+
+
+class AutoAssignLotRequest(BaseModel):
+    lot_id: str
+
+
+@router.post(
+    "/auto-assign",
+    summary="Smart Auto-Assign Single Lot to Storage Slot",
+    description="Uses SmartStorageAllocator to place a PASS lot into the optimal cold/frozen slot."
+)
+def auto_assign_single_lot(payload: AutoAssignLotRequest, db: Session = Depends(get_db)):
+    from app.services.storage_allocator import SmartStorageAllocator
+
+    record = db.query(InspectionRecord).filter(InspectionRecord.lot_id == payload.lot_id).first()
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lot '{payload.lot_id}' not found"
+        )
+    if record.decision != "PASS":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Hanya lot berstatus PASS yang dapat ditempatkan di storage (lot saat ini berstatus {record.decision})."
+        )
+
+    result = SmartStorageAllocator.auto_assign(db=db, record=record)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Kapasitas seluruh slot penyimpanan (Cold & Frozen) telah terisi penuh."
+        )
+
+    return {
+        "status": "success",
+        "message": f"Lot {record.lot_id} berhasil dialokasikan ke Slot {result['slot_id']}",
+        **result
+    }
+
+
+@router.post(
+    "/auto-assign-all",
+    summary="Smart Auto-Assign All Pending Lots",
+    description="Batch runs smart storage allocator for all PASS lots not yet placed in a slot."
+)
+def auto_assign_all_lots(db: Session = Depends(get_db)):
+    from app.services.storage_allocator import SmartStorageAllocator
+
+    pending_records = db.query(InspectionRecord).filter(
+        InspectionRecord.decision == "PASS",
+        InspectionRecord.storage_slot == None,
+        InspectionRecord.dispatch_id == None
+    ).order_by(desc(InspectionRecord.timestamp)).all()
+
+    assigned = []
+    failed = []
+
+    for r in pending_records:
+        res = SmartStorageAllocator.auto_assign(db=db, record=r)
+        if res:
+            assigned.append(res)
+        else:
+            failed.append(r.lot_id)
+
+    return {
+        "status": "success",
+        "total_pending": len(pending_records),
+        "assigned_count": len(assigned),
+        "failed_count": len(failed),
+        "assignments": assigned,
+        "failed_lots": failed,
+    }
+

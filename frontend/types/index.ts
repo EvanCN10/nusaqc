@@ -36,6 +36,10 @@ export interface InspectionResult {
   freshnessNote?: string;
   storage_slot?: string;
   storageSlot?: string;
+  agent_reasoning?: string;
+  agentReasoning?: string;
+  adjudicated_by?: string;
+  adjudicatedBy?: string;
 }
 
 export interface LotRecord {
@@ -73,6 +77,10 @@ export interface LotRecord {
   inspectorNote?: string;
   reason_summary?: string;
   reasonSummary?: string;
+  agent_reasoning?: string;
+  agentReasoning?: string;
+  adjudicated_by?: string;
+  adjudicatedBy?: string;
 }
 
 export interface DashboardStats {
