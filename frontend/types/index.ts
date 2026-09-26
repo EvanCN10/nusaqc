@@ -34,6 +34,8 @@ export interface InspectionResult {
   imageUrl?: string;
   image_url?: string;
   freshnessNote?: string;
+  reason_summary?: string;
+  reasonSummary?: string;
   storage_slot?: string;
   storageSlot?: string;
   agent_reasoning?: string;
