@@ -11,7 +11,7 @@ import { CheckCircle2, AlertCircle } from "lucide-react";
 const DEFAULT_SETTINGS = {
   mockMode: true,
   cameraSource: "mock",
-  ipAddress: "192.168.1.42",
+  ipAddress: "192.168.137.251:8080",
   confidenceThreshold: 65,
   autoExportCSV: false,
   logRetention: "7",
@@ -28,11 +28,27 @@ export default function SettingsPage() {
 
   useEffect(() => {
     let isMounted = true;
+
+    // 1. Instant synchronous read from localStorage cache
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem("nusaqc_mock_mode");
+      if (cached !== null) {
+        setMockMode(cached === "true");
+      }
+    }
+
     const loadInitSettings = async () => {
       try {
         const res = await fetchSettings();
         if (isMounted && res) {
-          if (res.mock_mode_enabled !== undefined) setMockMode(Boolean(res.mock_mode_enabled));
+          const hasMock = res.mock_mode_enabled !== undefined || res.mockMode !== undefined || res.mockModeEnabled !== undefined;
+          if (hasMock) {
+            const serverVal = Boolean(res.mock_mode_enabled ?? res.mockMode ?? res.mockModeEnabled);
+            setMockMode(serverVal);
+            if (typeof window !== "undefined") {
+              localStorage.setItem("nusaqc_mock_mode", String(serverVal));
+            }
+          }
           if (res.camera_source) setCameraSource(res.camera_source);
           if (res.raspberry_pi_ip) setIpAddress(res.raspberry_pi_ip);
           if (res.confidence_threshold !== undefined || res.confidenceThreshold !== undefined) {
@@ -53,23 +69,48 @@ export default function SettingsPage() {
     };
   }, []);
 
+  const handleMockModeChange = async (val: boolean) => {
+    setMockMode(val);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("nusaqc_mock_mode", String(val));
+    }
+    try {
+      await saveSettings({
+        mock_mode_enabled: val,
+        mockModeEnabled: val,
+        mockMode: val,
+      });
+      setSaveMessage({
+        type: "success",
+        text: `Mock Hardware Mode berhasil diubah ke: ${val ? "ON (Mode Simulasi)" : "OFF (Mode Hardware RPi)"}`
+      });
+      setTimeout(() => setSaveMessage(null), 3500);
+    } catch (err) {
+      console.warn("Auto-save mock mode error:", err);
+    }
+  };
+
   const handleSave = async () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("nusaqc_mock_mode", String(mockMode));
+    }
     try {
       await saveSettings({
         mock_mode_enabled: mockMode,
+        mockModeEnabled: mockMode,
+        mockMode: mockMode,
         camera_source: cameraSource,
         raspberry_pi_ip: ipAddress,
         confidence_threshold: confidenceThreshold,
         auto_export_csv: autoExportCSV,
         log_retention_days: Number(logRetention) || 7,
       });
-      setSaveMessage({ type: "success", text: "Pengaturan sistem berhasil disimpan ke backend!" });
+      setSaveMessage({ type: "success", text: "Semua pengaturan sistem berhasil disimpan ke backend!" });
       setTimeout(() => setSaveMessage(null), 4000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setSaveMessage({ type: "error", text: "Gagal menyimpan pengaturan ke backend." });
     }
   };
-
   const handleReset = () => {
     setMockMode(DEFAULT_SETTINGS.mockMode);
     setCameraSource(DEFAULT_SETTINGS.cameraSource);
@@ -102,7 +143,7 @@ export default function SettingsPage() {
 
       <Hardware
         mockMode={mockMode}
-        onMockModeChange={setMockMode}
+        onMockModeChange={handleMockModeChange}
         cameraSource={cameraSource}
         onCameraSourceChange={setCameraSource}
         ipAddress={ipAddress}

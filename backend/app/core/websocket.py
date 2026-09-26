@@ -1,7 +1,6 @@
 from typing import List
 from fastapi import WebSocket
 
-# TODO: Check if the websocket connection is working as supposed to be or not
 
 class ConnectionManager:
     """Manages active WebSocket client connections for real-time event broadcasting."""
@@ -21,10 +20,14 @@ class ConnectionManager:
 
     async def broadcast_json(self, data: dict):
         """Broadcasts JSON payload to all connected frontend clients."""
-        for connection in self.active_connections:
+        dead: List[WebSocket] = []
+        for connection in list(self.active_connections):  # snapshot prevents concurrent-modification
             try:
                 await connection.send_json(data)
             except Exception as e:
-                print(f"⚠️ [WEBSOCKET] Error broadcasting to client: {e}")
+                print(f"⚠️ [WEBSOCKET] Broadcast error, dropping client: {e}")
+                dead.append(connection)
+        for conn in dead:
+            self.disconnect(conn)
 
 ws_manager = ConnectionManager()

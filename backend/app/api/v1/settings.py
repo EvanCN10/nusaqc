@@ -80,7 +80,9 @@ def get_settings(db: Session = Depends(get_db)):
         "selectedSpecies": species,
         "mock_mode_enabled": mock_mode,
         "mockModeEnabled": mock_mode,
-        "mockMode": mock_mode
+        "mockMode": mock_mode,
+        "raspberry_pi_ip": getattr(record, "raspberry_pi_ip", "192.168.137.251:8080") or "192.168.137.251:8080",
+        "camera_source": getattr(record, "camera_source", "edge_mjpeg") or "edge_mjpeg"
     }
 
 @router.post(
@@ -128,16 +130,20 @@ async def save_settings(request: Request, db: Session = Depends(get_db)):
     else:
         species_str = str(raw_species)
 
-    # 5. Parse Mock Mode
+    # 5. Parse Mock Mode (preserve existing DB value if not provided in payload)
     raw_mock = payload.get("mock_mode_enabled")
     if raw_mock is None:
         raw_mock = payload.get("mockModeEnabled")
     if raw_mock is None:
-        raw_mock = payload.get("mockMode", True)
-    mock_mode = bool(raw_mock)
+        raw_mock = payload.get("mockMode")
+
+    record = db.query(SystemSetting).filter(SystemSetting.key == "global_config").first()
+    if raw_mock is None:
+        mock_mode = bool(record.mock_mode_enabled) if record and record.mock_mode_enabled is not None else False
+    else:
+        mock_mode = bool(raw_mock)
 
     # Persist changes into SQLite
-    record = db.query(SystemSetting).filter(SystemSetting.key == "global_config").first()
     if not record:
         record = SystemSetting(
             key="global_config",
@@ -145,7 +151,9 @@ async def save_settings(request: Request, db: Session = Depends(get_db)):
             auto_export_csv=auto_exp,
             log_retention_days=retention,
             active_species=species_str,
-            mock_mode_enabled=mock_mode
+            mock_mode_enabled=mock_mode,
+            raspberry_pi_ip=payload.get("raspberry_pi_ip"),
+            camera_source=payload.get("camera_source", "edge_mjpeg")
         )
         db.add(record)
     else:
@@ -154,6 +162,10 @@ async def save_settings(request: Request, db: Session = Depends(get_db)):
         record.log_retention_days = retention
         record.active_species = species_str
         record.mock_mode_enabled = mock_mode
+        if "raspberry_pi_ip" in payload:
+            record.raspberry_pi_ip = payload["raspberry_pi_ip"]
+        if "camera_source" in payload:
+            record.camera_source = payload["camera_source"]
 
     db.commit()
     db.refresh(record)

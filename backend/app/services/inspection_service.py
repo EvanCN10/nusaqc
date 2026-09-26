@@ -34,7 +34,14 @@ class InspectionService:
         filename: str,
         fish_family: str,
         db: Session,
-        custom_lot_id: Optional[str] = None
+        custom_lot_id: Optional[str] = None,
+        edge_grade: Optional[str] = None,
+        edge_grade_confidence: Optional[float] = None,
+        edge_defects: Optional[list] = None,
+        edge_decision: Optional[str] = None,
+        edge_hardware_signal: Optional[str] = None,
+        edge_reason: Optional[str] = None,
+        edge_processing_time_ms: Optional[int] = None,
     ) -> InspectionResultSchema:
         start_time = time.time()
 
@@ -49,40 +56,59 @@ class InspectionService:
         pil_image.save(file_path, format="JPEG", quality=90)
         image_url = f"/uploads/{saved_filename}"
 
-        # 3. AI Inference
-        ai_engine = get_ai_engine()
-        freshness_result = ai_engine.predict_freshness(pil_image)
-        grade = freshness_result["grade"]
-        grade_confidence = freshness_result["confidence"]
+        # 3. AI Inference / Edge Ingestion
+        if edge_grade and edge_decision:
+            # Ingest precomputed edge inference results (preserves 1:1 hardware actuation truth)
+            grade = edge_grade
+            grade_confidence = edge_grade_confidence if edge_grade_confidence is not None else 0.95
+            defects_schemas = []
+            if edge_defects and isinstance(edge_defects, list):
+                for d in edge_defects:
+                    if isinstance(d, dict) and "label" in d and "bbox" in d:
+                        defects_schemas.append(DefectSchema(
+                            label=d["label"],
+                            bbox=d["bbox"],
+                            confidence=d.get("confidence", 1.0)
+                        ))
+            decision = edge_decision
+            hardware_signal = edge_hardware_signal or ("GREEN" if decision == "PASS" else "RED" if decision == "FAIL" else "YELLOW")
+            reason = edge_reason or f"Edge Decision: {decision}"
+            processing_time_ms = edge_processing_time_ms if edge_processing_time_ms is not None else int((time.time() - start_time) * 1000)
+        else:
+            # Central AI Inference
+            ai_engine = get_ai_engine()
+            freshness_result = ai_engine.predict_freshness(pil_image)
+            grade = freshness_result["grade"]
+            grade_confidence = freshness_result["confidence"]
 
-        # Fetch configured confidence threshold from settings
-        setting = db.query(SystemSetting).filter(SystemSetting.key == "global_config").first()
-        threshold = float(setting.confidence_threshold) if setting and setting.confidence_threshold is not None else 0.75
+            # Fetch configured confidence threshold from settings
+            setting = db.query(SystemSetting).filter(SystemSetting.key == "global_config").first()
+            threshold = float(setting.confidence_threshold) if setting and setting.confidence_threshold is not None else 0.75
 
-        raw_defects = ai_engine.predict_defects(pil_image)
-        # Filter defects by confidence threshold
-        defects_schemas = [
-            DefectSchema(label=d["label"], bbox=d["bbox"], confidence=d["confidence"])
-            for d in raw_defects
-            if d.get("confidence", 1.0) >= threshold
-        ]
+            raw_defects = ai_engine.predict_defects(pil_image)
+            # Filter defects by confidence threshold
+            defects_schemas = [
+                DefectSchema(label=d["label"], bbox=d["bbox"], confidence=d["confidence"])
+                for d in raw_defects
+                if d.get("confidence", 1.0) >= threshold
+            ]
 
-        # 4. Decision Engine
-        decision, hardware_signal, reason = DecisionEngine.evaluate(
-            grade=grade,
-            grade_confidence=grade_confidence,
-            defects=[d.dict() for d in defects_schemas],
-            confidence_threshold=threshold
-        )
+            # Decision Engine
+            decision, hardware_signal, reason = DecisionEngine.evaluate(
+                grade=grade,
+                grade_confidence=grade_confidence,
+                defects=[d.dict() for d in defects_schemas],
+                confidence_threshold=threshold
+            )
+            processing_time_ms = int((time.time() - start_time) * 1000)
 
-        # 5. Hardware Actuation
+        # 4. Hardware Actuation (Local Central Server / Mock)
         hardware_controller = get_hardware_controller()
         hardware_controller.trigger_signal(hardware_signal)
 
-        processing_time_ms = int((time.time() - start_time) * 1000)
         timestamp_iso = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
-        # 6. Persist to SQLite
+        # 5. Persist to SQLite
         db_record = InspectionRecord(
             lot_id=lot_id,
             timestamp=datetime.utcnow(),
@@ -114,14 +140,22 @@ class InspectionService:
             image_url=image_url
         )
 
-
-        # 7. Real-Time Broadcast via WebSocket
+        # 6. Real-Time Broadcast via WebSocket (dual-compatible payload)
         try:
+            broadcast_payload = result_payload.dict()
+            broadcast_payload.update({
+                "lotId": lot_id,
+                "confidence": round(grade_confidence * 100, 1) if grade_confidence <= 1.0 else grade_confidence,
+                "conveyorSignal": hardware_signal,
+                "freshnessNote": f"Grade {grade} ({int(grade_confidence * 100) if grade_confidence <= 1.0 else int(grade_confidence)}% confidence)",
+                "processingTimeMs": processing_time_ms,
+                "imageUrl": image_url,
+            })
             await ws_manager.broadcast_json({
                 "event": "NEW_INSPECTION",
-                "data": result_payload.dict()
+                "data": broadcast_payload
             })
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"⚠️ Failed to broadcast WebSocket event: {e}")
 
         return result_payload

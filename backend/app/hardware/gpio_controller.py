@@ -1,12 +1,13 @@
 from typing import Dict, Any
 from app.hardware.controller import BaseHardwareController
 
-# PIN CONFIGURATION (Raspberry Pi 5 BCM standard)
-PIN_CONVEYOR_RELAY = 17  # Active LOW Relay for conveyor AC motor
-PIN_LIGHT_GREEN = 27     # Green Tower LED
-PIN_LIGHT_YELLOW = 22    # Yellow Tower LED
-PIN_LIGHT_RED = 23       # Red Tower LED
-PIN_BUZZER = 24          # 5V Buzzer
+# PIN CONFIGURATION (Raspberry Pi 4 BCM — aligned with plan/iot/02_IMPLEMENTASI_HARDWARE_DAN_EDGE.md)
+PIN_IR_SENSOR     = 17  # GPIO 17: E18-D80NK signal (Active LOW, input pull-up)
+PIN_BUZZER        = 18  # GPIO 18: Active Buzzer 5V (PWM)
+PIN_LIGHT_GREEN   = 27  # GPIO 27: LED Hijau (PASS)
+PIN_LIGHT_YELLOW  = 22  # GPIO 22: LED Kuning (CONDITIONAL)
+PIN_LIGHT_RED     = 23  # GPIO 23: LED Merah (FAIL)
+PIN_CONVEYOR_RELAY = 25 # GPIO 25: Relay Conveyor Motor Cut-off (Active HIGH)
 
 # TODO: Check if this GPIO controller have the functions correctly configured or not
 
@@ -22,10 +23,13 @@ class GPIOController(BaseHardwareController):
             self.GPIO.setmode(self.GPIO.BCM)
             self.GPIO.setwarnings(False)
 
-            # Setup Output Pins
-            pins = [PIN_CONVEYOR_RELAY, PIN_LIGHT_GREEN, PIN_LIGHT_YELLOW, PIN_LIGHT_RED, PIN_BUZZER]
-            for pin in pins:
-                self.GPIO.setup(pin, self.GPIO.OUT)
+            # Output pins: all start LOW
+            out_pins = [PIN_CONVEYOR_RELAY, PIN_LIGHT_GREEN, PIN_LIGHT_YELLOW, PIN_LIGHT_RED, PIN_BUZZER]
+            for pin in out_pins:
+                self.GPIO.setup(pin, self.GPIO.OUT, initial=self.GPIO.LOW)
+
+            # Input: IR sensor E18-D80NK Active LOW, internal pull-up 3.3V
+            self.GPIO.setup(PIN_IR_SENSOR, self.GPIO.IN, pull_up_down=self.GPIO.PUD_UP)
 
             # Initial State: Conveyor Normal, Green Light ON
             self.trigger_signal("GREEN")
